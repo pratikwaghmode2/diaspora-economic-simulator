@@ -1,0 +1,1564 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Global Indian Diaspora | Economic Footprint & Remittance Simulator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              800: '#1e40af',
+              900: '#1e3a8a',
+            },
+            saffron: '#FF9933',
+            indiaGreen: '#138808',
+            navyAshoka: '#000080'
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #0B0F19;
+      color: #E2E8F0;
+    }
+    .glass-card {
+      background: rgba(17, 24, 39, 0.75);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .glass-card:hover {
+      border-color: rgba(59, 130, 246, 0.3);
+    }
+    .glow-effect {
+      box-shadow: 0 0 40px -10px rgba(59, 130, 246, 0.2);
+    }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0B0F19;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #475569;
+    }
+    /* Range Slider Styling */
+    input[type=range] {
+      accent-color: #3b82f6;
+    }
+    /* Print Styles for Executive PDF Report */
+    @media print {
+      body {
+        background-color: #FFFFFF !important;
+        color: #0F172A !important;
+      }
+      header, .no-print, input, select, button, #simulator, #live-rate-badge {
+        display: none !important;
+      }
+      .glass-card {
+        background: #FFFFFF !important;
+        border: 1px solid #CBD5E1 !important;
+        box-shadow: none !important;
+        color: #0F172A !important;
+      }
+      .text-white {
+        color: #0F172A !important;
+      }
+      .text-slate-400, .text-slate-300 {
+        color: #475569 !important;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen antialiased selection:bg-blue-600 selection:text-white pb-16">
+
+  <!-- TOP HERO BAR -->
+  <header class="border-b border-slate-800/80 bg-slate-950/60 sticky top-0 z-50 backdrop-blur-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-amber-500 p-0.5 flex items-center justify-center shadow-lg shadow-blue-500/20">
+          <div class="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center text-xl">
+            🇮🇳
+          </div>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-base sm:text-lg font-bold text-white tracking-tight">Global Indian Diaspora & Remittance Engine</h1>
+            <span class="text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full uppercase tracking-wider">Jan 2026 MEA Data</span>
+          </div>
+          <p class="text-xs text-slate-400">Official Diaspora Demographics & Macroeconomic Stress-Testing Simulator</p>
+        </div>
+      </div>
+
+      <!-- Currency Switcher & Actions -->
+      <div class="flex flex-wrap items-center gap-2.5">
+        <div id="live-rate-badge" class="hidden sm:flex items-center gap-1.5 text-[11px] bg-slate-900/90 border border-slate-700/80 px-2.5 py-1 rounded-lg text-slate-300">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span id="live-rate-text">Connecting to Live Rates...</span>
+        </div>
+
+        <div class="bg-slate-900/90 border border-slate-700/80 rounded-lg p-1 flex items-center gap-1 shadow-inner">
+          <span class="text-[11px] font-medium text-slate-400 px-2">Currency:</span>
+          <button onclick="setCurrency('USD')" id="btn-curr-USD" class="curr-btn px-2.5 py-1 rounded text-xs font-semibold transition-all bg-blue-600 text-white shadow">USD ($)</button>
+          <button onclick="setCurrency('EUR')" id="btn-curr-EUR" class="curr-btn px-2.5 py-1 rounded text-xs font-semibold text-slate-400 hover:text-white transition-all">EUR (€)</button>
+          <button onclick="setCurrency('INR')" id="btn-curr-INR" class="curr-btn px-2.5 py-1 rounded text-xs font-semibold text-slate-400 hover:text-white transition-all">INR (₹)</button>
+          <button onclick="setCurrency('GBP')" id="btn-curr-GBP" class="curr-btn px-2.5 py-1 rounded text-xs font-semibold text-slate-400 hover:text-white transition-all">GBP (£)</button>
+        </div>
+
+        <button onclick="openGuideModal()" class="text-xs font-semibold bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 px-3 py-2 rounded-lg transition-all flex items-center gap-1.5">
+          <span>📖 Quick Guide (NRI vs PIO)</span>
+        </button>
+        <a href="#simulator" class="text-xs font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white px-3.5 py-2 rounded-lg shadow-md shadow-blue-600/20 transition-all flex items-center gap-1.5">
+          <span>⚡ Simulation Lab</span>
+        </a>
+        <button onclick="window.print()" class="text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-2 rounded-lg transition-all flex items-center gap-1.5 shadow">
+          <span>📄 PDF Report</span>
+        </button>
+        <button onclick="exportCSV()" class="text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-2 rounded-lg transition-all flex items-center gap-1">
+          <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+          Export
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-6">
+
+    <!-- KPI HERO BANNER -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
+      <!-- KPI 1 -->
+      <div class="glass-card rounded-xl p-4 relative overflow-hidden group">
+        <div class="absolute -right-4 -bottom-4 w-20 h-20 bg-blue-600/10 rounded-full blur-xl group-hover:bg-blue-600/20 transition-all"></div>
+        <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Total Global Diaspora</p>
+        <div class="flex items-baseline gap-2 mt-1">
+          <span class="text-2xl font-extrabold text-white tracking-tight">37.29M</span>
+          <span class="text-xs text-blue-400 font-medium">205 territories</span>
+        </div>
+        <div class="mt-2.5 flex items-center gap-1 text-[11px] text-slate-400">
+          <span class="w-2 h-2 rounded-full bg-indigo-400"></span> PIOs: <strong class="text-slate-200">19.52M</strong>
+          <span class="mx-1 text-slate-600">•</span>
+          <span class="w-2 h-2 rounded-full bg-emerald-400"></span> NRIs: <strong class="text-slate-200">17.76M</strong>
+        </div>
+      </div>
+
+      <!-- KPI 2 -->
+      <div class="glass-card rounded-xl p-4 relative overflow-hidden group">
+        <div class="absolute -right-4 -bottom-4 w-20 h-20 bg-emerald-600/10 rounded-full blur-xl group-hover:bg-emerald-600/20 transition-all"></div>
+        <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Annual Inward Remittances</p>
+        <div class="flex items-baseline gap-2 mt-1">
+          <span id="kpi-total-remit" class="text-2xl font-extrabold text-emerald-400 tracking-tight">$126.54B</span>
+          <span class="text-[11px] text-slate-400 font-mono" id="kpi-inr-equiv">₹10.95L Cr</span>
+        </div>
+        <p class="mt-2.5 text-[11px] text-slate-400">
+          <span class="text-emerald-400 font-semibold">#1 in World</span> ahead of Mexico & China
+        </p>
+      </div>
+
+      <!-- KPI 3 -->
+      <div class="glass-card rounded-xl p-4 relative overflow-hidden group">
+        <div class="absolute -right-4 -bottom-4 w-20 h-20 bg-amber-600/10 rounded-full blur-xl group-hover:bg-amber-600/20 transition-all"></div>
+        <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Top Remittance Corridor</p>
+        <div class="flex items-baseline gap-2 mt-1">
+          <span class="text-2xl font-extrabold text-white tracking-tight">🇺🇸 United States</span>
+        </div>
+        <p class="mt-2.5 text-[11px] text-slate-400">
+          <span id="kpi-usa-val" class="font-bold text-slate-200">$31.50B</span> (24.9% of global inflow)
+        </p>
+      </div>
+
+      <!-- KPI 4 -->
+      <div class="glass-card rounded-xl p-4 relative overflow-hidden group">
+        <div class="absolute -right-4 -bottom-4 w-20 h-20 bg-purple-600/10 rounded-full blur-xl group-hover:bg-purple-600/20 transition-all"></div>
+        <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Largest NRI Population</p>
+        <div class="flex items-baseline gap-2 mt-1">
+          <span class="text-2xl font-extrabold text-white tracking-tight">🇦🇪 UAE</span>
+          <span class="text-xs text-purple-400 font-medium">4.33M NRIs</span>
+        </div>
+        <p class="mt-2.5 text-[11px] text-slate-400">
+          <span id="kpi-uae-val" class="font-bold text-slate-200">$24.50B</span> (99.6% are NRIs)
+        </p>
+      </div>
+
+      <!-- KPI 5: Windfall Tracker -->
+      <div class="glass-card rounded-xl p-4 border-l-4 border-blue-500 relative overflow-hidden group bg-gradient-to-br from-blue-950/30 to-slate-900/60">
+        <p class="text-xs font-medium text-blue-300 uppercase tracking-wider">Simulation Windfall</p>
+        <div class="flex items-baseline gap-2 mt-1">
+          <span id="kpi-windfall" class="text-2xl font-extrabold text-white tracking-tight">₹0 Cr</span>
+        </div>
+        <p id="kpi-windfall-sub" class="mt-2.5 text-[11px] text-slate-400">Baseline market rate active</p>
+      </div>
+    </div>
+
+    <!-- MAIN DASHBOARD: MAP & SIMULATOR LAB -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+      <!-- LEFT: INTERACTIVE GEOSPATIAL MAP & CHARTS (8 cols) -->
+      <div class="lg:col-span-8 space-y-6">
+        
+        <!-- MAP CARD -->
+        <div class="glass-card rounded-2xl p-5 glow-effect">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="inline-block w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse"></span>
+                <h2 class="text-base font-bold text-white tracking-tight">Global Geospatial Distribution</h2>
+              </div>
+              <p class="text-xs text-slate-400 mt-0.5">Click on any country to inspect demographics, corridor classification & financial footprint</p>
+            </div>
+
+            <!-- Map Metric Toggle -->
+            <div class="flex items-center bg-slate-900 border border-slate-800 rounded-lg p-1">
+              <button onclick="setMapMetric('remittance')" id="btn-map-remit" class="px-2.5 py-1 text-xs font-medium rounded bg-blue-600 text-white transition-all shadow">Remittances</button>
+              <button onclick="setMapMetric('total')" id="btn-map-total" class="px-2.5 py-1 text-xs font-medium rounded text-slate-400 hover:text-white transition-all">Total Diaspora</button>
+              <button onclick="setMapMetric('nri_pct')" id="btn-map-nri" class="px-2.5 py-1 text-xs font-medium rounded text-slate-400 hover:text-white transition-all">NRI %</button>
+            </div>
+          </div>
+
+          <!-- Plotly Map Container -->
+          <div id="world-map" class="w-full h-[400px] sm:h-[460px] rounded-xl overflow-hidden bg-slate-950/80 border border-slate-800/80"></div>
+
+          <div class="mt-3 flex flex-wrap items-center justify-between text-xs text-slate-400 px-1">
+            <div class="flex items-center gap-3">
+              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-blue-600"></span> High Value Hubs</span>
+              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-indigo-500"></span> Gulf Workforce</span>
+              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-cyan-600"></span> Historical PIO</span>
+            </div>
+            <span class="text-[11px] text-slate-500">Interactive: Zoom, pan, and hover over 205 countries</span>
+          </div>
+        </div>
+
+        <!-- CHARTS GRID -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- TOP 10 CORRIDORS BAR CHART -->
+          <div class="glass-card rounded-2xl p-5">
+            <h3 class="text-sm font-bold text-white tracking-tight mb-1">Top 10 Remittance Sending Nations</h3>
+            <p class="text-xs text-slate-400 mb-3">Accounts for ~85% of total inward flows to India</p>
+            <div id="bar-top10" class="w-full h-[280px]"></div>
+          </div>
+
+          <!-- REGIONAL BREAKDOWN DONUT CHART -->
+          <div class="glass-card rounded-2xl p-5">
+            <h3 class="text-sm font-bold text-white tracking-tight mb-1">Regional Corridor Contribution</h3>
+            <p class="text-xs text-slate-400 mb-3">Gulf & North America dominate the economic balance</p>
+            <div id="donut-regions" class="w-full h-[280px]"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT: SIMULATION LAB & INSPECTOR (4 cols) -->
+      <div class="lg:col-span-4 space-y-6">
+
+        <!-- SIMULATION LAB PANEL -->
+        <div id="simulator" class="glass-card rounded-2xl p-5 border-blue-500/30 glow-effect relative">
+          <div class="flex items-center justify-between mb-3.5">
+            <div class="flex items-center gap-2">
+              <div class="w-7 h-7 rounded-lg bg-blue-600/20 text-blue-400 flex items-center justify-center font-bold text-sm">⚡</div>
+              <h2 class="text-sm font-bold text-white uppercase tracking-wider">Economic Stress-Test Lab</h2>
+            </div>
+            <button onclick="resetSliders()" class="text-[11px] text-slate-400 hover:text-blue-400 underline font-medium">Reset</button>
+          </div>
+          <p class="text-xs text-slate-300 mb-4">Adjust macroeconomic sliders to simulate real-time currency shocks and diaspora workforce cycles:</p>
+
+          <!-- Slider 1: USD/INR -->
+          <div class="space-y-1.5 mb-4">
+            <div class="flex justify-between text-xs">
+              <span class="font-medium text-slate-300">USD / INR Exchange Rate</span>
+              <span id="val-usd-inr" class="font-mono font-bold text-blue-400">₹86.50</span>
+            </div>
+            <input type="range" id="slider-usd-inr" min="75" max="100" step="0.5" value="86.5" oninput="runSimulation()" class="w-full h-1.5 bg-slate-800 rounded-lg cursor-pointer">
+            <div class="flex justify-between text-[10px] text-slate-500">
+              <span>₹75 (Strong Rupee)</span>
+              <span>₹86.5 (Base)</span>
+              <span>₹100 (Depreciation)</span>
+            </div>
+          </div>
+
+          <!-- Slider 2: EUR/INR -->
+          <div class="space-y-1.5 mb-4">
+            <div class="flex justify-between text-xs">
+              <span class="font-medium text-slate-300">EUR / INR Exchange Rate</span>
+              <span id="val-eur-inr" class="font-mono font-bold text-indigo-400">₹94.00</span>
+            </div>
+            <input type="range" id="slider-eur-inr" min="80" max="115" step="0.5" value="94.0" oninput="runSimulation()" class="w-full h-1.5 bg-slate-800 rounded-lg cursor-pointer">
+            <div class="flex justify-between text-[10px] text-slate-500">
+              <span>₹80.0</span>
+              <span>₹94.0 (Base)</span>
+              <span>₹115.0</span>
+            </div>
+          </div>
+
+          <!-- Slider 3: Gulf Workforce / Wage Shift -->
+          <div class="space-y-1.5 mb-4">
+            <div class="flex justify-between text-xs">
+              <span class="font-medium text-slate-300">Gulf Workforce & Wage Shift</span>
+              <span id="val-gulf-shift" class="font-mono font-bold text-emerald-400">0%</span>
+            </div>
+            <input type="range" id="slider-gulf-shift" min="-20" max="20" step="1" value="0" oninput="runSimulation()" class="w-full h-1.5 bg-slate-800 rounded-lg cursor-pointer">
+            <div class="flex justify-between text-[10px] text-slate-500">
+              <span>-20% (Contraction)</span>
+              <span>Baseline</span>
+              <span>+20% (Expansion)</span>
+            </div>
+          </div>
+
+          <!-- Slider 4: Western Tech Corridor Earnings -->
+          <div class="space-y-1.5 mb-4">
+            <div class="flex justify-between text-xs">
+              <span class="font-medium text-slate-300">Western Tech/STEM Wage Shift</span>
+              <span id="val-tech-shift" class="font-mono font-bold text-amber-400">0%</span>
+            </div>
+            <input type="range" id="slider-tech-shift" min="-20" max="20" step="1" value="0" oninput="runSimulation()" class="w-full h-1.5 bg-slate-800 rounded-lg cursor-pointer">
+            <div class="flex justify-between text-[10px] text-slate-500">
+              <span>-20% (Layoffs)</span>
+              <span>Baseline</span>
+              <span>+20% (Tech Boom)</span>
+            </div>
+          </div>
+
+          <!-- Simulation Output Card -->
+          <div class="mt-4 p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 space-y-2">
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-slate-400">Simulated Total Inflow:</span>
+              <span id="sim-total-inflow" class="font-bold text-white font-mono text-sm">$126.54B</span>
+            </div>
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-slate-400">INR Realization (Lakh Cr):</span>
+              <span id="sim-inr-cr" class="font-bold text-emerald-400 font-mono text-sm">₹10.95L Cr</span>
+            </div>
+            <div class="pt-2 border-t border-slate-800/80 flex items-center justify-between text-xs">
+              <span class="text-slate-400">Net Rupee Windfall:</span>
+              <span id="sim-windfall-cr" class="font-bold text-blue-400 font-mono">₹0 Cr</span>
+            </div>
+          </div>
+
+          <!-- 1-Click Copy Scenario for Social Media -->
+          <button id="btn-copy-sim" onclick="copySimulationText()" class="mt-3.5 w-full py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold flex items-center justify-center gap-2 transition-all shadow-md group">
+            <span class="text-base group-hover:scale-110 transition-transform">📋</span>
+            <span id="btn-copy-text">Copy My Simulation for LinkedIn</span>
+          </button>
+        </div>
+
+        <!-- COUNTRY INSPECTOR PANEL -->
+        <div id="country-inspector" class="glass-card rounded-2xl p-5">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Country Inspector</h3>
+            <span id="insp-badge" class="text-[10px] bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full font-semibold">Click Map or Select</span>
+          </div>
+
+          <div class="space-y-3">
+            <div>
+              <label class="block text-[11px] text-slate-400 mb-1">Select Country to Analyze:</label>
+              <select id="country-select" onchange="inspectCountry(this.value)" class="w-full bg-slate-900 border border-slate-700 text-slate-200 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                <!-- Populated via JS -->
+              </select>
+            </div>
+
+            <div id="inspector-details" class="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800 space-y-2.5 text-xs">
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400">Region:</span>
+                <span id="insp-region" class="font-semibold text-white">North America</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400">Total Diaspora:</span>
+                <span id="insp-total" class="font-mono font-bold text-white">6,079,221</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400">PIOs vs NRIs:</span>
+                <span id="insp-split" class="font-mono text-slate-300">3.77M (62%) / 2.31M (38%)</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400">Estimated Remittance:</span>
+                <span id="insp-remit" class="font-mono font-bold text-emerald-400">$31.50B</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400">Economic Power Index:</span>
+                <span id="insp-depi" class="font-mono font-bold text-amber-400">92.4 / 100</span>
+              </div>
+              <div class="pt-2 border-t border-slate-800">
+                <p id="insp-narrative" class="text-[11px] text-slate-400 italic leading-relaxed">
+                  High-income STEM, medical, finance, and corporate management corridor. Generates large per-capita transfers, venture funding, and wealth deposits.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- INDIAN STATE-WISE INWARD REMITTANCE BREAKDOWN (RBI SURVEY) -->
+    <div class="glass-card rounded-2xl p-6 glow-effect">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-xl">🇮🇳</span>
+            <h2 class="text-base font-bold text-white tracking-tight">Where the Money Lands in India (State-Wise Footprint)</h2>
+            <span class="text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full uppercase tracking-wider">Official RBI Survey Data</span>
+          </div>
+          <p class="text-xs text-slate-400 mt-0.5">State distribution of inward foreign remittances (dynamically recalculated from your simulation)</p>
+        </div>
+        <div class="text-left sm:text-right">
+          <span class="text-xs text-slate-400">Total Inflow to States:</span>
+          <span id="state-total-header" class="text-sm font-bold text-emerald-400 font-mono ml-1">₹10.95L Cr</span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <!-- State Inflow Bar Chart (7 cols) -->
+        <div class="lg:col-span-7">
+          <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Top Recipient States (Inward ₹ Crores)</h3>
+          <div id="bar-indian-states" class="w-full h-[330px]"></div>
+        </div>
+
+        <!-- State Inspector & Corridor Insights (5 cols) -->
+        <div class="lg:col-span-5 space-y-3.5">
+          <div class="p-4 rounded-xl bg-slate-900/90 border border-slate-800 space-y-3">
+            <div>
+              <label class="block text-[11px] text-slate-400 mb-1 font-medium">Select State to Inspect Inflow & Overseas Corridor:</label>
+              <select id="state-select" onchange="inspectState(this.value)" class="w-full bg-slate-950 border border-slate-700 text-slate-200 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+              </select>
+            </div>
+
+            <div class="space-y-2 pt-1 text-xs">
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400">Share of National Remittances:</span>
+                <span id="state-pct" class="font-mono font-bold text-blue-400">35.2%</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400">Simulated State Inflow:</span>
+                <span id="state-inflow" class="font-mono font-bold text-emerald-400 text-sm">₹3,85,289 Cr</span>
+              </div>
+              <div class="pt-2 border-t border-slate-800">
+                <span class="text-[11px] text-slate-400 font-semibold block mb-1">Primary International Diaspora Corridor:</span>
+                <p id="state-corridor" class="text-[11px] text-slate-300 leading-relaxed italic bg-slate-950/60 p-2.5 rounded-lg border border-slate-800/80">
+                  Global Corporate Hub & High-Value NRE Accounts (US, Gulf, UK)
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick State Corridor Highlights -->
+          <div class="grid grid-cols-2 gap-2 text-[11px]">
+            <div class="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800/80">
+              <span class="font-bold text-emerald-400 block mb-0.5">🌴 Kerala (10.2%)</span>
+              <span class="text-slate-400">Heavily Gulf-dependent; powers household consumption and local construction.</span>
+            </div>
+            <div class="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800/80">
+              <span class="font-bold text-blue-400 block mb-0.5">💻 Karnataka (7.6%)</span>
+              <span class="text-slate-400">Powered by Silicon Valley & Seattle tech professionals.</span>
+            </div>
+            <div class="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800/80">
+              <span class="font-bold text-amber-400 block mb-0.5">🌾 Punjab (5.4%)</span>
+              <span class="text-slate-400">Strong ties with Canada, UK, Australia & European agricultural hubs.</span>
+            </div>
+            <div class="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800/80">
+              <span class="font-bold text-purple-400 block mb-0.5">🏭 Gujarat (5.8%)</span>
+              <span class="text-slate-400">Historic entrepreneurial diaspora in the US, UK, and East Africa.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PERSONAL REMITTANCE CALCULATOR -->
+    <div class="glass-card rounded-2xl p-6 glow-effect border-indigo-500/30 bg-gradient-to-r from-slate-950/80 via-slate-900/90 to-indigo-950/30">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-5">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center text-xl shadow">
+            🧮
+          </div>
+          <div>
+            <h2 class="text-base font-bold text-white tracking-tight">Personal Remittance Impact Calculator</h2>
+            <p class="text-xs text-slate-400">Calculate how your (or your family's) foreign earnings support homes and investments in India</p>
+          </div>
+        </div>
+        <span class="text-xs font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-3 py-1 rounded-full">Personal Finance Tool</span>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+        <!-- Calculator Inputs (5 cols) -->
+        <div class="lg:col-span-5 p-4 rounded-xl bg-slate-950/60 border border-slate-800 space-y-3.5">
+          <div>
+            <label class="block text-[11px] text-slate-400 mb-1 font-medium">1. Sending Country (Where you earn):</label>
+            <select id="calc-country" onchange="updateCalcCurrency()" class="w-full bg-slate-900 border border-slate-700 text-slate-200 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+              <option value="UAE" data-curr="AED" data-rate="23.55" data-avg="450">United Arab Emirates (AED)</option>
+              <option value="U.S.A." data-curr="USD" data-rate="86.50" data-avg="1050" selected>United States (USD)</option>
+              <option value="U.K." data-curr="GBP" data-rate="109.50" data-avg="800">United Kingdom (GBP)</option>
+              <option value="Germany" data-curr="EUR" data-rate="94.02" data-avg="750">Germany / Eurozone (EUR)</option>
+              <option value="Canada" data-curr="CAD" data-rate="63.14" data-avg="600">Canada (CAD)</option>
+              <option value="Australia" data-curr="AUD" data-rate="56.17" data-avg="850">Australia (AUD)</option>
+              <option value="Saudi Arabia" data-curr="SAR" data-rate="23.07" data-avg="350">Saudi Arabia (SAR)</option>
+              <option value="Singapore" data-curr="SGD" data-rate="65.04" data-avg="1200">Singapore (SGD)</option>
+              <option value="Kuwait" data-curr="KWD" data-rate="281.00" data-avg="300">Kuwait (KWD)</option>
+              <option value="Qatar" data-curr="QAR" data-rate="23.76" data-avg="420">Qatar (QAR)</option>
+              <option value="Oman" data-curr="OMR" data-rate="224.68" data-avg="280">Oman (OMR)</option>
+            </select>
+          </div>
+
+          <div>
+            <div class="flex justify-between text-[11px] mb-1 font-medium">
+              <span class="text-slate-400">2. Monthly Transfer Amount:</span>
+              <span id="calc-amount-label" class="font-mono font-bold text-indigo-400">$1,000 USD</span>
+            </div>
+            <input type="number" id="calc-amount" value="1000" min="50" step="50" oninput="calculatePersonalImpact()" class="w-full bg-slate-900 border border-slate-700 text-slate-200 font-mono font-bold rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            <div class="flex gap-1.5 mt-1.5">
+              <button onclick="setCalcPreset(500)" class="text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-0.5 rounded border border-slate-700">500</button>
+              <button onclick="setCalcPreset(1000)" class="text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-0.5 rounded border border-slate-700">1,000</button>
+              <button onclick="setCalcPreset(2500)" class="text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-0.5 rounded border border-slate-700">2,500</button>
+              <button onclick="setCalcPreset(5000)" class="text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-0.5 rounded border border-slate-700">5,000</button>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-[11px] text-slate-400 mb-1 font-medium">3. Recipient Indian State:</label>
+            <select id="calc-state" onchange="calculatePersonalImpact()" class="w-full bg-slate-900 border border-slate-700 text-slate-200 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+              <!-- Populated via JS -->
+            </select>
+          </div>
+        </div>
+
+        <!-- Calculator Results Display (7 cols) -->
+        <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <!-- Monthly Realization -->
+          <div class="p-4 rounded-xl bg-slate-900/90 border border-slate-800 space-y-1">
+            <span class="text-[11px] text-slate-400 uppercase tracking-wider font-semibold">Monthly Inflow to Family</span>
+            <div id="calc-monthly-inr" class="text-2xl font-extrabold text-emerald-400 tracking-tight font-mono">₹86,500</div>
+            <p class="text-[11px] text-slate-400">Received directly in Indian bank accounts</p>
+          </div>
+
+          <!-- Annual Total -->
+          <div class="p-4 rounded-xl bg-slate-900/90 border border-slate-800 space-y-1">
+            <span class="text-[11px] text-slate-400 uppercase tracking-wider font-semibold">Annual Family Contribution</span>
+            <div id="calc-annual-inr" class="text-2xl font-extrabold text-white tracking-tight font-mono">₹10.38 Lakh</div>
+            <p class="text-[11px] text-slate-400">Total yearly remittances transferred</p>
+          </div>
+
+          <!-- Currency Windfall Bonus -->
+          <div class="p-4 rounded-xl bg-slate-900/90 border border-slate-800 space-y-1 sm:col-span-2">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] text-slate-400 uppercase tracking-wider font-semibold">Your "Rupee Windfall" Bonus (+5% FX Shift)</span>
+              <span id="calc-windfall-tag" class="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full font-bold">Extra Free Cash</span>
+            </div>
+            <div class="flex items-baseline gap-2">
+              <span id="calc-windfall-amount" class="text-xl font-extrabold text-emerald-400 font-mono">+₹51,900 / year</span>
+              <span class="text-[11px] text-slate-400">extra for your family if Rupee weakens by 5%</span>
+            </div>
+            <p id="calc-narrative" class="text-[11px] text-slate-300 leading-relaxed pt-1 border-t border-slate-800/80 mt-1.5">
+              At this transfer rate, you are sending ~1.2x the average monthly NRI remittance from the United States corridor to families in India.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STUDENT & RESEARCHER INSIGHT STORIES -->
+    <div class="glass-card rounded-2xl p-6 glow-effect">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-6">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-lg">🎓</span>
+            <h2 class="text-base font-bold text-white tracking-tight">Student & Analytical Research Spotlight</h2>
+          </div>
+          <p class="text-xs text-slate-400">Four counter-intuitive discoveries revealed by analyzing the January 2026 data</p>
+        </div>
+        <span class="text-xs text-blue-400 bg-blue-500/10 border border-blue-500/20 px-3 py-1 rounded-full font-medium">Data Storytelling</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Story 1 -->
+        <div class="p-4 rounded-xl bg-slate-900/80 border border-slate-800/90 flex flex-col justify-between hover:border-slate-700 transition-all">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-bold text-amber-400">Paradox 1</span>
+              <span class="text-xs">🌴 vs 🏙️</span>
+            </div>
+            <h4 class="text-sm font-bold text-white mb-1.5">The Tale of Two Diasporas</h4>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              Why do <strong>Mauritius (865k)</strong>, <strong>Fiji (316k)</strong>, and <strong>Trinidad (700k)</strong> have over 60–70% Indian populations but send negligible remittances, while the <strong>UAE ($24.5B)</strong> sends billions?
+            </p>
+          </div>
+          <div class="mt-3 pt-3 border-t border-slate-800 text-[11px] text-slate-300">
+            <strong>Key Insight:</strong> 99% are 4th-gen <strong>PIO citizens</strong> whose wealth is local. Gulf workers are <strong>NRIs on temporary visas</strong> who must remit home for their future.
+          </div>
+        </div>
+
+        <!-- Story 2 -->
+        <div class="p-4 rounded-xl bg-slate-900/80 border border-slate-800/90 flex flex-col justify-between hover:border-slate-700 transition-all">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-bold text-emerald-400">Macro Fact</span>
+              <span class="text-xs">💰 vs 🏢</span>
+            </div>
+            <h4 class="text-sm font-bold text-white mb-1.5">Remittances Exceed All FDI</h4>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              India's inward remittances (<strong>~$126.5 Billion</strong>) dwarf all Foreign Direct Investment (FDI ~<strong>$70–$80B</strong>) combined, acting as India's true foreign exchange anchor.
+            </p>
+          </div>
+          <div class="mt-3 pt-3 border-t border-slate-800 text-[11px] text-slate-300">
+            <strong>Key Insight:</strong> Unlike volatile stock investments, remittances are non-debt, unconditional, and flow counter-cyclically during Indian crises.
+          </div>
+        </div>
+
+        <!-- Story 3 -->
+        <div class="p-4 rounded-xl bg-slate-900/80 border border-slate-800/90 flex flex-col justify-between hover:border-slate-700 transition-all">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-bold text-blue-400">Trend 3</span>
+              <span class="text-xs">🩺 & ✈️</span>
+            </div>
+            <h4 class="text-sm font-bold text-white mb-1.5">The Medical Student Corridor</h4>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              Why are there <strong>7,540 Indians in Armenia</strong>, <strong>7,956 in Kazakhstan</strong>, <strong>600 in Georgia</strong>, and <strong>14,200 in Cyprus</strong>?
+            </p>
+          </div>
+          <div class="mt-3 pt-3 border-t border-slate-800 text-[11px] text-slate-300">
+            <strong>Key Insight:</strong> Central & Eastern Europe have emerged as prime medical education destinations, creating reverse outward student remittances that later reverse into professional earnings.
+          </div>
+        </div>
+
+        <!-- Story 4 -->
+        <div class="p-4 rounded-xl bg-slate-900/80 border border-slate-800/90 flex flex-col justify-between hover:border-slate-700 transition-all">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-bold text-purple-400">Mechanics 4</span>
+              <span class="text-xs">📈 vs 📉</span>
+            </div>
+            <h4 class="text-sm font-bold text-white mb-1.5">The "Rupee Windfall" Effect</h4>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              When the Rupee weakens from <strong>₹86.5 to ₹90/$</strong>, an NRI in Dubai or London remitting $1,000 provides their family <strong>₹3,500 more</strong> with zero extra labor.
+            </p>
+          </div>
+          <div class="mt-3 pt-3 border-t border-slate-800 text-[11px] text-slate-300">
+            <strong>Key Insight:</strong> Rupee depreciation triggers sudden surges into Indian NRE fixed deposits and real estate as diaspora members lock in favorable exchange rates.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HEAD-TO-HEAD COMPARISON TOOL -->
+    <div class="glass-card rounded-2xl p-6">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="text-sm font-bold text-white tracking-tight">Head-to-Head Country Comparison</h3>
+          <p class="text-xs text-slate-400">Compare demographic structures and economic flows between any two nations</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Compare Selectors -->
+        <div class="flex items-center gap-3">
+          <span class="text-xs font-bold text-blue-400">Nation A:</span>
+          <select id="comp-a" onchange="renderComparison()" class="flex-1 bg-slate-900 border border-slate-700 text-slate-200 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </select>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="text-xs font-bold text-emerald-400">Nation B:</span>
+          <select id="comp-b" onchange="renderComparison()" class="flex-1 bg-slate-900 border border-slate-700 text-slate-200 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </select>
+        </div>
+      </div>
+
+      <div id="comparison-result" class="mt-4 p-4 rounded-xl bg-slate-900/60 border border-slate-800 grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+        <!-- Rendered via JS -->
+      </div>
+    </div>
+
+    <!-- FULL SEARCHABLE DATA TABLE -->
+    <div class="glass-card rounded-2xl p-6">
+      <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-4">
+        <div>
+          <h3 class="text-base font-bold text-white tracking-tight">Complete Country Registry & Financial Breakdown</h3>
+          <p class="text-xs text-slate-400">All 205 territories with live search, regional filters, and export capabilities</p>
+        </div>
+
+        <!-- Filters & Search -->
+        <div class="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
+          <input type="text" id="table-search" placeholder="Search country..." oninput="renderTable()" class="bg-slate-900 border border-slate-700 text-slate-200 placeholder-slate-500 px-3 py-1.5 rounded-lg text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none w-full sm:w-44">
+          
+          <select id="region-filter" onchange="renderTable()" class="bg-slate-900 border border-slate-700 text-slate-200 px-3 py-1.5 rounded-lg text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            <option value="ALL">All Regions</option>
+            <option value="GCC & Middle East">GCC & Middle East</option>
+            <option value="North America">North America</option>
+            <option value="Europe">Europe</option>
+            <option value="Asia-Pacific">Asia-Pacific</option>
+            <option value="Africa">Africa</option>
+            <option value="Latin America & Caribbean">Latin America & Caribbean</option>
+            <option value="Central Asia">Central Asia</option>
+          </select>
+
+          <select id="type-filter" onchange="renderTable()" class="bg-slate-900 border border-slate-700 text-slate-200 px-3 py-1.5 rounded-lg text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            <option value="ALL">All Diaspora Profiles</option>
+            <option value="NRI_HEAVY">NRI-Dominated (&gt;75%)</option>
+            <option value="PIO_HEAVY">PIO-Dominated (&gt;75%)</option>
+            <option value="BALANCED">Balanced Mix (25-75%)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Table Container -->
+      <div class="overflow-x-auto rounded-xl border border-slate-800">
+        <table class="w-full text-left text-xs">
+          <thead class="bg-slate-900/90 text-slate-300 font-semibold uppercase tracking-wider border-b border-slate-800">
+            <tr>
+              <th class="py-3 px-3.5 text-center">Rank</th>
+              <th class="py-3 px-3.5">Country / Territory</th>
+              <th class="py-3 px-3.5">Region</th>
+              <th class="py-3 px-3.5 text-right">PIOs</th>
+              <th class="py-3 px-3.5 text-right">NRIs</th>
+              <th class="py-3 px-3.5 text-right">Total Diaspora</th>
+              <th class="py-3 px-3.5 text-center">NRI vs PIO</th>
+              <th class="py-3 px-3.5 text-right cursor-pointer hover:text-blue-400" onclick="sortTable('remit')">Est. Remittance ↕</th>
+              <th class="py-3 px-3.5 text-center">DEPI Score</th>
+            </tr>
+          </thead>
+          <tbody id="table-body" class="divide-y divide-slate-800/60 font-mono">
+            <!-- Populated via JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <div class="mt-3 flex items-center justify-between text-xs text-slate-400 px-1">
+        <span id="table-count">Showing 205 of 205 territories</span>
+        <button onclick="exportCSV()" class="text-blue-400 hover:text-blue-300 font-medium">Download Clean CSV Dataset &rarr;</button>
+      </div>
+    </div>
+
+    <!-- FOOTER & METHODOLOGY -->
+    <footer class="pt-8 border-t border-slate-800/80 text-xs text-slate-500 space-y-3">
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div>
+          <p class="font-semibold text-slate-400">Global Indian Diaspora: Economic Footprint & Remittance Simulation Engine (GID-EFRE)</p>
+          <p>Data Source: Ministry of External Affairs (MEA), Govt of India (Jan 2026) • Macroeconomic benchmarks: RBI & World Bank</p>
+        </div>
+        <div class="flex items-center gap-4">
+          <button onclick="openGuideModal()" class="hover:text-blue-400 text-indigo-400 font-medium transition-colors">How to Read This Data (Guide)</button>
+          <span>•</span>
+          <a href="https://github.com" target="_blank" class="hover:text-blue-400 transition-colors">GitHub Repository</a>
+          <span>•</span>
+          <span>MIT License</span>
+        </div>
+      </div>
+    </footer>
+
+  </main>
+
+  <!-- QUICK GUIDE / GLOSSARY MODAL -->
+  <div id="guide-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="glass-card max-w-2xl w-full rounded-2xl p-6 border-slate-700 max-h-[90vh] overflow-y-auto space-y-5 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">📖</span>
+          <h3 class="text-base font-bold text-white">How to Read & Understand This Dashboard</h3>
+        </div>
+        <button onclick="closeGuideModal()" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 text-lg">✕</button>
+      </div>
+
+      <div class="space-y-4 text-xs text-slate-300 leading-relaxed">
+        <!-- NRI vs PIO -->
+        <div class="p-4 rounded-xl bg-slate-900/90 border border-slate-800 space-y-2">
+          <h4 class="text-sm font-bold text-white flex items-center gap-2">
+            <span>🇮🇳 NRI vs. 🌍 PIO (The Fundamental Distinction)</span>
+          </h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+            <div class="p-2.5 rounded-lg bg-slate-950/60 border-l-2 border-emerald-500">
+              <span class="font-bold text-emerald-400 text-xs">NRI (Non-Resident Indian)</span>
+              <p class="text-slate-400 mt-1">Holds an <strong>Indian Passport</strong> and Indian citizenship. Working or studying abroad temporarily (e.g. UAE, Saudi Arabia, Silicon Valley). <strong>Sends regular monthly money home</strong> to support family and build retirement savings.</p>
+            </div>
+            <div class="p-2.5 rounded-lg bg-slate-950/60 border-l-2 border-indigo-500">
+              <span class="font-bold text-indigo-400 text-xs">PIO (Person of Indian Origin)</span>
+              <p class="text-slate-400 mt-1">Holds a <strong>Foreign Passport</strong> (US, UK, Fiji, Mauritius citizen) of Indian descent. Wealth and assets are locally settled in host country. <strong>Sends very little routine remittance</strong>; financial ties are mostly tourism or business investments.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Simulation Lab -->
+        <div class="p-4 rounded-xl bg-slate-900/90 border border-slate-800 space-y-1.5">
+          <h4 class="text-sm font-bold text-white flex items-center gap-2">
+            <span>⚡ What is the "Simulation Lab" & "Windfall"?</span>
+          </h4>
+          <p class="text-slate-400">
+            When the Indian Rupee weakens against the Dollar or Euro, an NRI's foreign salary automatically converts into <strong>more Rupees</strong> in India. The <strong>Simulation Windfall</strong> counter shows the exact extra Crore gain flowing to Indian household bank accounts without anyone having to work extra hours.
+          </p>
+        </div>
+
+        <!-- DEPI Score -->
+        <div class="p-4 rounded-xl bg-slate-900/90 border border-slate-800 space-y-1.5">
+          <h4 class="text-sm font-bold text-white flex items-center gap-2">
+            <span>📊 What is the DEPI Score (0 to 100)?</span>
+          </h4>
+          <p class="text-slate-400">
+            <strong>Diaspora Economic Power Index:</strong> A composite score that ranks each nation by financial impact, factoring total remittance volume, NRI density, and per-capita financial flow back to India.
+          </p>
+        </div>
+      </div>
+
+      <div class="pt-2 border-t border-slate-800 flex justify-end">
+        <button onclick="closeGuideModal()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-lg text-xs transition-all shadow-md">Got it, Explore Data</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- EMBEDDED DATA & APPLICATION LOGIC -->
+  <script>
+    function openGuideModal() {
+      const modal = document.getElementById('guide-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeGuideModal() {
+      const modal = document.getElementById('guide-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    const DATA = {"metadata": {"title": "Population of Overseas Indians & Economic Remittance Calibration", "source_demographics": "Ministry of External Affairs (MEA), Government of India (January 2026)", "source_macroeconomics": "Reserve Bank of India (RBI) & World Bank Migration Briefs", "total_countries": 205, "total_diaspora": 37290745, "total_pios": 19520317, "total_nris": 17760528, "total_baseline_remittance_usd": 126537735180, "total_baseline_remittance_inr_lakh_cr": 10.95, "base_usd_inr": 86.5, "base_eur_inr": 94.02, "base_gbp_inr": 109.49}, "countries": [{"s_no": 1, "country": "Afghanistan", "iso3": "AFG", "region": "Asia-Pacific", "currency": "USD", "currency_to_usd": 1.0, "pios": 167, "nris": 2, "total": 169, "nri_pct": 1.2, "pio_pct": 98.8, "baseline_remittance_usd": 17115, "baseline_remittance_local": 17115.0, "baseline_remittance_inr_cr": 0.15, "depi_score": 29.3, "narrative": "Long-established multi-generational diaspora community integrated into the host nation's economic fabric."}, {"s_no": 2, "country": "Albania", "iso3": "ALB", "region": "Europe", "currency": "USD", "currency_to_usd": 1.0, "pios": 4, "nris": 550, "total": 554, "nri_pct": 99.3, "pio_pct": 0.7, "baseline_remittance_usd": 2860180, "baseline_remittance_local": 2860180.0, "baseline_remittance_inr_cr": 24.74, "depi_score": 67.6, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 3, "country": "Algeria", "iso3": "DZA", "region": "Africa", "currency": "USD", "currency_to_usd": 1.0, "pios": 4052, "nris": 28, "total": 4080, "nri_pct": 0.7, "pio_pct": 99.3, "baseline_remittance_usd": 271940, "baseline_remittance_local": 271940.0, "baseline_remittance_inr_cr": 2.35, "depi_score": 39.0, "narrative": "Long-established multi-generational diaspora community integrated into the host nation's economic fabric."}, {"s_no": 4, "country": "Andorra", "iso3": "AND", "region": "Europe", "currency": "EUR", "currency_to_usd": 0.92, "pios": 200, "nris": 50, "total": 250, "nri_pct": 20.0, "pio_pct": 80.0, "baseline_remittance_usd": 269000, "baseline_remittance_local": 247480.0, "baseline_remittance_inr_cr": 2.33, "depi_score": 41.2, "narrative": "Long-established multi-generational diaspora community integrated into the host nation's economic fabric."}, {"s_no": 5, "country": "Angola", "iso3": "AGO", "region": "Africa", "currency": "USD", "currency_to_usd": 1.0, "pios": 62, "nris": 7905, "total": 7967, "nri_pct": 99.2, "pio_pct": 0.8, "baseline_remittance_usd": 25298790, "baseline_remittance_local": 25298790.0, "baseline_remittance_inr_cr": 218.83, "depi_score": 75.5, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 6, "country": "Antigua & Barbuda", "iso3": "ATG", "region": "Latin America & Caribbean", "currency": "USD", "currency_to_usd": 1.0, "pios": 200, "nris": 300, "total": 500, "nri_pct": 60.0, "pio_pct": 40.0, "baseline_remittance_usd": 609000, "baseline_remittance_local": 609000.0, "baseline_remittance_inr_cr": 5.27, "depi_score": 53.8, "narrative": "Balanced community of established diaspora citizens (PIOs) and active resident professionals (NRIs)."}, {"s_no": 7, "country": "Argentina", "iso3": "ARG", "region": "Latin America & Caribbean", "currency": "USD", "currency_to_usd": 1.0, "pios": 1800, "nris": 800, "total": 2600, "nri_pct": 30.8, "pio_pct": 69.2, "baseline_remittance_usd": 1681000, "baseline_remittance_local": 1681000.0, "baseline_remittance_inr_cr": 14.54, "depi_score": 50.6, "narrative": "Balanced community of established diaspora citizens (PIOs) and active resident professionals (NRIs)."}, {"s_no": 8, "country": "Armenia", "iso3": "ARM", "region": "Europe", "currency": "USD", "currency_to_usd": 1.0, "pios": 21, "nris": 7540, "total": 7561, "nri_pct": 99.7, "pio_pct": 0.3, "baseline_remittance_usd": 39208945, "baseline_remittance_local": 39208945.0, "baseline_remittance_inr_cr": 339.16, "depi_score": 76.6, "narrative": "Rapidly expanding higher education and medical student hub, accompanied by emerging trade and technical services."}, {"s_no": 9, "country": "Aruba", "iso3": "ABW", "region": "Latin America & Caribbean", "currency": "USD", "currency_to_usd": 1.0, "pios": 400, "nris": 600, "total": 1000, "nri_pct": 60.0, "pio_pct": 40.0, "baseline_remittance_usd": 1218000, "baseline_remittance_local": 1218000.0, "baseline_remittance_inr_cr": 10.54, "depi_score": 56.2, "narrative": "Balanced community of established diaspora citizens (PIOs) and active resident professionals (NRIs)."}, {"s_no": 10, "country": "Australia", "iso3": "AUS", "region": "Asia-Pacific", "currency": "AUD", "currency_to_usd": 1.54, "pios": 719897, "nris": 125903, "total": 845800, "nri_pct": 14.9, "pio_pct": 85.1, "baseline_remittance_usd": 4850000000, "baseline_remittance_local": 7469000000.0, "baseline_remittance_inr_cr": 41952.5, "depi_score": 71.8, "narrative": "High-income STEM, medical, finance, and corporate management corridor. Generates large per-capita transfers, venture funding, and wealth deposits."}, {"s_no": 11, "country": "Austria", "iso3": "AUT", "region": "Europe", "currency": "EUR", "currency_to_usd": 0.92, "pios": 18500, "nris": 13439, "total": 31939, "nri_pct": 42.1, "pio_pct": 57.9, "baseline_remittance_usd": 70715300, "baseline_remittance_local": 65058076.0, "baseline_remittance_inr_cr": 611.69, "depi_score": 65.0, "narrative": "Balanced community of established diaspora citizens (PIOs) and active resident professionals (NRIs)."}, {"s_no": 12, "country": "Azerbaijan", "iso3": "AZE", "region": "Europe", "currency": "USD", "currency_to_usd": 1.0, "pios": 78, "nris": 610, "total": 688, "nri_pct": 88.7, "pio_pct": 11.3, "baseline_remittance_usd": 3175510, "baseline_remittance_local": 3175510.0, "baseline_remittance_inr_cr": 27.47, "depi_score": 65.4, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 13, "country": "Bahamas", "iso3": "BHS", "region": "Latin America & Caribbean", "currency": "USD", "currency_to_usd": 1.0, "pios": 20, "nris": 330, "total": 350, "nri_pct": 94.3, "pio_pct": 5.7, "baseline_remittance_usd": 660900, "baseline_remittance_local": 660900.0, "baseline_remittance_inr_cr": 5.72, "depi_score": 62.3, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 14, "country": "Bahrain", "iso3": "BHR", "region": "GCC & Middle East", "currency": "BHD", "currency_to_usd": 0.376, "pios": 4799, "nris": 315427, "total": 320226, "nri_pct": 98.5, "pio_pct": 1.5, "baseline_remittance_usd": 1800000000, "baseline_remittance_local": 676800000.0, "baseline_remittance_inr_cr": 15570.0, "depi_score": 89.3, "narrative": "Major Gulf labor and trade corridor; 99% NRI workforce with exceptionally high remittance frequency for family maintenance and NRE bank deposits."}, {"s_no": 15, "country": "Bangladesh", "iso3": "BGD", "region": "Asia-Pacific", "currency": "USD", "currency_to_usd": 1.0, "pios": 10, "nris": 8550, "total": 8560, "nri_pct": 99.9, "pio_pct": 0.1, "baseline_remittance_usd": 41040450, "baseline_remittance_local": 41040450.0, "baseline_remittance_inr_cr": 355.0, "depi_score": 76.9, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 16, "country": "Barbados", "iso3": "BRB", "region": "Latin America & Caribbean", "currency": "USD", "currency_to_usd": 1.0, "pios": 3550, "nris": 525, "total": 4075, "nri_pct": 12.9, "pio_pct": 87.1, "baseline_remittance_usd": 1209750, "baseline_remittance_local": 1209750.0, "baseline_remittance_inr_cr": 10.46, "depi_score": 45.7, "narrative": "Long-established multi-generational diaspora community integrated into the host nation's economic fabric."}, {"s_no": 17, "country": "Belarus", "iso3": "BLR", "region": "Europe", "currency": "USD", "currency_to_usd": 1.0, "pios": 151, "nris": 1375, "total": 1526, "nri_pct": 90.1, "pio_pct": 9.9, "baseline_remittance_usd": 7156795, "baseline_remittance_local": 7156795.0, "baseline_remittance_inr_cr": 61.91, "depi_score": 68.5, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 18, "country": "Belgium", "iso3": "BEL", "region": "Europe", "currency": "EUR", "currency_to_usd": 0.92, "pios": 19201, "nris": 18958, "total": 38159, "nri_pct": 49.7, "pio_pct": 50.3, "baseline_remittance_usd": 420000000, "baseline_remittance_local": 386400000.0, "baseline_remittance_inr_cr": 3633.0, "depi_score": 71.5, "narrative": "Balanced community of established diaspora citizens (PIOs) and active resident professionals (NRIs)."}, {"s_no": 19, "country": "Belize", "iso3": "BLZ", "region": "Latin America & Caribbean", "currency": "USD", "currency_to_usd": 1.0, "pios": 528, "nris": 275, "total": 803, "nri_pct": 34.2, "pio_pct": 65.8, "baseline_remittance_usd": 573760, "baseline_remittance_local": 573760.0, "baseline_remittance_inr_cr": 4.96, "depi_score": 47.7, "narrative": "Balanced community of established diaspora citizens (PIOs) and active resident professionals (NRIs)."}, {"s_no": 20, "country": "Benin", "iso3": "BEN", "region": "Africa", "currency": "USD", "currency_to_usd": 1.0, "pios": 18, "nris": 2500, "total": 2518, "nri_pct": 99.3, "pio_pct": 0.7, "baseline_remittance_usd": 8000810, "baseline_remittance_local": 8000810.0, "baseline_remittance_inr_cr": 69.21, "depi_score": 71.6, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 21, "country": "Bhutan", "iso3": "BTN", "region": "Asia-Pacific", "currency": "USD", "currency_to_usd": 1.0, "pios": 0, "nris": 50000, "total": 50000, "nri_pct": 100.0, "pio_pct": 0.0, "baseline_remittance_usd": 240000000, "baseline_remittance_local": 240000000.0, "baseline_remittance_inr_cr": 2076.0, "depi_score": 83.0, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 22, "country": "Bolivia", "iso3": "BOL", "region": "Latin America & Caribbean", "currency": "USD", "currency_to_usd": 1.0, "pios": 12, "nris": 40, "total": 52, "nri_pct": 76.9, "pio_pct": 23.1, "baseline_remittance_usd": 80540, "baseline_remittance_local": 80540.0, "baseline_remittance_inr_cr": 0.7, "depi_score": 50.9, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 23, "country": "Bonaire & Smaller Islands", "iso3": "BES", "region": "Latin America & Caribbean", "currency": "USD", "currency_to_usd": 1.0, "pios": 12, "nris": 54, "total": 66, "nri_pct": 81.8, "pio_pct": 18.2, "baseline_remittance_usd": 108540, "baseline_remittance_local": 108540.0, "baseline_remittance_inr_cr": 0.94, "depi_score": 53.1, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 24, "country": "Bosnia and Herzegovina", "iso3": "BIH", "region": "Europe", "currency": "USD", "currency_to_usd": 1.0, "pios": 100, "nris": 600, "total": 700, "nri_pct": 85.7, "pio_pct": 14.3, "baseline_remittance_usd": 3124500, "baseline_remittance_local": 3124500.0, "baseline_remittance_inr_cr": 27.03, "depi_score": 64.6, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 25, "country": "Botswana", "iso3": "BWA", "region": "Africa", "currency": "USD", "currency_to_usd": 1.0, "pios": 3129, "nris": 9371, "total": 12500, "nri_pct": 75.0, "pio_pct": 25.0, "baseline_remittance_usd": 30128005, "baseline_remittance_local": 30128005.0, "baseline_remittance_inr_cr": 260.61, "depi_score": 70.3, "narrative": "Balanced community of established diaspora citizens (PIOs) and active resident professionals (NRIs)."}, {"s_no": 26, "country": "Brazil", "iso3": "BRA", "region": "Latin America & Caribbean", "currency": "USD", "currency_to_usd": 1.0, "pios": 3000, "nris": 2987, "total": 5987, "nri_pct": 49.9, "pio_pct": 50.1, "baseline_remittance_usd": 6109000, "baseline_remittance_local": 6109000.0, "baseline_remittance_inr_cr": 52.84, "depi_score": 59.3, "narrative": "Balanced community of established diaspora citizens (PIOs) and active resident professionals (NRIs)."}, {"s_no": 27, "country": "British Virgin Islands", "iso3": "VGB", "region": "Latin America & Caribbean", "currency": "USD", "currency_to_usd": 1.0, "pios": 20, "nris": 230, "total": 250, "nri_pct": 92.0, "pio_pct": 8.0, "baseline_remittance_usd": 460900, "baseline_remittance_local": 460900.0, "baseline_remittance_inr_cr": 3.99, "depi_score": 60.5, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 28, "country": "Brunei Darussalam", "iso3": "BRN", "region": "Asia-Pacific", "currency": "USD", "currency_to_usd": 1.0, "pios": 251, "nris": 14500, "total": 14751, "nri_pct": 98.3, "pio_pct": 1.7, "baseline_remittance_usd": 69611295, "baseline_remittance_local": 69611295.0, "baseline_remittance_inr_cr": 602.14, "depi_score": 78.3, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 29, "country": "Bulgaria", "iso3": "BGR", "region": "Europe", "currency": "USD", "currency_to_usd": 1.0, "pios": 128, "nris": 949, "total": 1077, "nri_pct": 88.1, "pio_pct": 11.9, "baseline_remittance_usd": 4940560, "baseline_remittance_local": 4940560.0, "baseline_remittance_inr_cr": 42.74, "depi_score": 66.8, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 30, "country": "Burkina Faso", "iso3": "BFA", "region": "Africa", "currency": "USD", "currency_to_usd": 1.0, "pios": 1, "nris": 1000, "total": 1001, "nri_pct": 99.9, "pio_pct": 0.1, "baseline_remittance_usd": 3200045, "baseline_remittance_local": 3200045.0, "baseline_remittance_inr_cr": 27.68, "depi_score": 68.6, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 31, "country": "Burundi", "iso3": "BDI", "region": "Africa", "currency": "USD", "currency_to_usd": 1.0, "pios": 100, "nris": 1100, "total": 1200, "nri_pct": 91.7, "pio_pct": 8.3, "baseline_remittance_usd": 3524500, "baseline_remittance_local": 3524500.0, "baseline_remittance_inr_cr": 30.49, "depi_score": 66.9, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 32, "country": "Cambodia", "iso3": "KHM", "region": "Asia-Pacific", "currency": "USD", "currency_to_usd": 1.0, "pios": 93, "nris": 5000, "total": 5093, "nri_pct": 98.2, "pio_pct": 1.8, "baseline_remittance_usd": 24004185, "baseline_remittance_local": 24004185.0, "baseline_remittance_inr_cr": 207.64, "depi_score": 74.7, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 33, "country": "Cameroon", "iso3": "CMR", "region": "Africa", "currency": "USD", "currency_to_usd": 1.0, "pios": 0, "nris": 2000, "total": 2000, "nri_pct": 100.0, "pio_pct": 0.0, "baseline_remittance_usd": 6400000, "baseline_remittance_local": 6400000.0, "baseline_remittance_inr_cr": 55.36, "depi_score": 71.0, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 34, "country": "Canada", "iso3": "CAN", "region": "North America", "currency": "CAD", "currency_to_usd": 1.37, "pios": 1859680, "nris": 1388300, "total": 3247980, "nri_pct": 42.7, "pio_pct": 57.3, "baseline_remittance_usd": 4900000000, "baseline_remittance_local": 6713000000.0, "baseline_remittance_inr_cr": 42385.0, "depi_score": 80.0, "narrative": "High-income STEM, medical, finance, and corporate management corridor. Generates large per-capita transfers, venture funding, and wealth deposits."}, {"s_no": 35, "country": "Cape Verde", "iso3": "CPV", "region": "Africa", "currency": "USD", "currency_to_usd": 1.0, "pios": 1, "nris": 69, "total": 70, "nri_pct": 98.6, "pio_pct": 1.4, "baseline_remittance_usd": 220845, "baseline_remittance_local": 220845.0, "baseline_remittance_inr_cr": 1.91, "depi_score": 59.1, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 36, "country": "Cayman Islands", "iso3": "CYM", "region": "Latin America & Caribbean", "currency": "USD", "currency_to_usd": 1.0, "pios": 100, "nris": 2400, "total": 2500, "nri_pct": 96.0, "pio_pct": 4.0, "baseline_remittance_usd": 4804500, "baseline_remittance_local": 4804500.0, "baseline_remittance_inr_cr": 41.56, "depi_score": 69.5, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 37, "country": "Central African Republic", "iso3": "CAF", "region": "Africa", "currency": "USD", "currency_to_usd": 1.0, "pios": 0, "nris": 150, "total": 150, "nri_pct": 100.0, "pio_pct": 0.0, "baseline_remittance_usd": 480000, "baseline_remittance_local": 480000.0, "baseline_remittance_inr_cr": 4.15, "depi_score": 62.1, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 38, "country": "Chad", "iso3": "TCD", "region": "Africa", "currency": "USD", "currency_to_usd": 1.0, "pios": 0, "nris": 250, "total": 250, "nri_pct": 100.0, "pio_pct": 0.0, "baseline_remittance_usd": 800000, "baseline_remittance_local": 800000.0, "baseline_remittance_inr_cr": 6.92, "depi_score": 63.9, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 39, "country": "Chile", "iso3": "CHL", "region": "Latin America & Caribbean", "currency": "USD", "currency_to_usd": 1.0, "pios": 1500, "nris": 2500, "total": 4000, "nri_pct": 62.5, "pio_pct": 37.5, "baseline_remittance_usd": 5067500, "baseline_remittance_local": 5067500.0, "baseline_remittance_inr_cr": 43.83, "depi_score": 61.7, "narrative": "Balanced community of established diaspora citizens (PIOs) and active resident professionals (NRIs)."}, {"s_no": 40, "country": "China", "iso3": "CHN", "region": "Asia-Pacific", "currency": "USD", "currency_to_usd": 1.0, "pios": 12700, "nris": 43431, "total": 56131, "nri_pct": 77.4, "pio_pct": 22.6, "baseline_remittance_usd": 209040300, "baseline_remittance_local": 209040300.0, "baseline_remittance_inr_cr": 1808.2, "depi_score": 77.1, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 41, "country": "Colombia", "iso3": "COL", "region": "Latin America & Caribbean", "currency": "USD", "currency_to_usd": 1.0, "pios": 314, "nris": 991, "total": 1305, "nri_pct": 75.9, "pio_pct": 24.1, "baseline_remittance_usd": 1996130, "baseline_remittance_local": 1996130.0, "baseline_remittance_inr_cr": 17.27, "depi_score": 61.7, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 42, "country": "Commonwealth of Dominica", "iso3": "DMA", "region": "Latin America & Caribbean", "currency": "USD", "currency_to_usd": 1.0, "pios": 500, "nris": 100, "total": 600, "nri_pct": 16.7, "pio_pct": 83.3, "baseline_remittance_usd": 222500, "baseline_remittance_local": 222500.0, "baseline_remittance_inr_cr": 1.92, "depi_score": 40.7, "narrative": "Long-established multi-generational diaspora community integrated into the host nation's economic fabric."}, {"s_no": 43, "country": "Comoros", "iso3": "COM", "region": "Africa", "currency": "USD", "currency_to_usd": 1.0, "pios": 200, "nris": 50, "total": 250, "nri_pct": 20.0, "pio_pct": 80.0, "baseline_remittance_usd": 169000, "baseline_remittance_local": 169000.0, "baseline_remittance_inr_cr": 1.46, "depi_score": 40.0, "narrative": "Long-established multi-generational diaspora community integrated into the host nation's economic fabric."}, {"s_no": 44, "country": "Congo (Democratic Republic)", "iso3": "COD", "region": "Africa", "currency": "USD", "currency_to_usd": 1.0, "pios": 3000, "nris": 22000, "total": 25000, "nri_pct": 88.0, "pio_pct": 12.0, "baseline_remittance_usd": 70535000, "baseline_remittance_local": 70535000.0, "baseline_remittance_inr_cr": 610.13, "depi_score": 76.3, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 45, "country": "Republic of Congo", "iso3": "COG", "region": "Africa", "currency": "USD", "currency_to_usd": 1.0, "pios": 0, "nris": 875, "total": 875, "nri_pct": 100.0, "pio_pct": 0.0, "baseline_remittance_usd": 2800000, "baseline_remittance_local": 2800000.0, "baseline_remittance_inr_cr": 24.22, "depi_score": 68.1, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 46, "country": "Cook Islands", "iso3": "COK", "region": "Asia-Pacific", "currency": "USD", "currency_to_usd": 1.0, "pios": 5, "nris": 0, "total": 5, "nri_pct": 0.0, "pio_pct": 100.0, "baseline_remittance_usd": 225, "baseline_remittance_local": 225.0, "baseline_remittance_inr_cr": 0.0, "depi_score": 19.3, "narrative": "Long-established multi-generational diaspora community integrated into the host nation's economic fabric."}, {"s_no": 47, "country": "Costa Rica", "iso3": "CRI", "region": "Latin America & Caribbean", "currency": "USD", "currency_to_usd": 1.0, "pios": 53, "nris": 1011, "total": 1064, "nri_pct": 95.0, "pio_pct": 5.0, "baseline_remittance_usd": 2024385, "baseline_remittance_local": 2024385.0, "baseline_remittance_inr_cr": 17.51, "depi_score": 66.3, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 48, "country": "Cote D Ivory", "iso3": "CIV", "region": "Africa", "currency": "USD", "currency_to_usd": 1.0, "pios": 37, "nris": 6576, "total": 6613, "nri_pct": 99.4, "pio_pct": 0.6, "baseline_remittance_usd": 21044865, "baseline_remittance_local": 21044865.0, "baseline_remittance_inr_cr": 182.04, "depi_score": 74.9, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 49, "country": "Croatia", "iso3": "HRV", "region": "Europe", "currency": "EUR", "currency_to_usd": 0.92, "pios": 86, "nris": 12176, "total": 12262, "nri_pct": 99.3, "pio_pct": 0.7, "baseline_remittance_usd": 63319070, "baseline_remittance_local": 58253544.4, "baseline_remittance_inr_cr": 547.71, "depi_score": 78.2, "narrative": "Emerging European workforce destination in logistics, construction, and hospitality sectors with fast-growing NRI registrations."}, {"s_no": 50, "country": "Cuba", "iso3": "CUB", "region": "Latin America & Caribbean", "currency": "USD", "currency_to_usd": 1.0, "pios": 0, "nris": 0, "total": 0, "nri_pct": 0.0, "pio_pct": 0.0, "baseline_remittance_usd": 0, "baseline_remittance_local": 0.0, "baseline_remittance_inr_cr": 0.0, "depi_score": 19.3, "narrative": "Balanced community of established diaspora citizens (PIOs) and active resident professionals (NRIs)."}, {"s_no": 51, "country": "Curacao", "iso3": "CUW", "region": "Latin America & Caribbean", "currency": "USD", "currency_to_usd": 1.0, "pios": 800, "nris": 700, "total": 1500, "nri_pct": 46.7, "pio_pct": 53.3, "baseline_remittance_usd": 1436000, "baseline_remittance_local": 1436000.0, "baseline_remittance_inr_cr": 12.42, "depi_score": 53.7, "narrative": "Balanced community of established diaspora citizens (PIOs) and active resident professionals (NRIs)."}, {"s_no": 52, "country": "Cyprus", "iso3": "CYP", "region": "Europe", "currency": "EUR", "currency_to_usd": 0.92, "pios": 426, "nris": 14237, "total": 14663, "nri_pct": 97.1, "pio_pct": 2.9, "baseline_remittance_usd": 74051570, "baseline_remittance_local": 68127444.4, "baseline_remittance_inr_cr": 640.55, "depi_score": 78.2, "narrative": "Rapidly expanding higher education and medical student hub, accompanied by emerging trade and technical services."}, {"s_no": 53, "country": "Czech Republic", "iso3": "CZE", "region": "Europe", "currency": "USD", "currency_to_usd": 1.0, "pios": 662, "nris": 11545, "total": 12207, "nri_pct": 94.6, "pio_pct": 5.4, "baseline_remittance_usd": 60063790, "baseline_remittance_local": 60063790.0, "baseline_remittance_inr_cr": 519.55, "depi_score": 76.9, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 54, "country": "Denmark", "iso3": "DNK", "region": "Europe", "currency": "USD", "currency_to_usd": 1.0, "pios": 3499, "nris": 18958, "total": 22457, "nri_pct": 84.4, "pio_pct": 15.6, "baseline_remittance_usd": 98739055, "baseline_remittance_local": 98739055.0, "baseline_remittance_inr_cr": 854.09, "depi_score": 76.1, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 55, "country": "Djibouti", "iso3": "DJI", "region": "Africa", "currency": "USD", "currency_to_usd": 1.0, "pios": 0, "nris": 800, "total": 800, "nri_pct": 100.0, "pio_pct": 0.0, "baseline_remittance_usd": 2560000, "baseline_remittance_local": 2560000.0, "baseline_remittance_inr_cr": 22.14, "depi_score": 67.8, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 56, "country": "Dominica Republic", "iso3": "DOM", "region": "Latin America & Caribbean", "currency": "USD", "currency_to_usd": 1.0, "pios": 2, "nris": 104, "total": 106, "nri_pct": 98.1, "pio_pct": 1.9, "baseline_remittance_usd": 208090, "baseline_remittance_local": 208090.0, "baseline_remittance_inr_cr": 1.8, "depi_score": 59.3, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 57, "country": "Ecuador", "iso3": "ECU", "region": "Latin America & Caribbean", "currency": "USD", "currency_to_usd": 1.0, "pios": 50, "nris": 350, "total": 400, "nri_pct": 87.5, "pio_pct": 12.5, "baseline_remittance_usd": 702250, "baseline_remittance_local": 702250.0, "baseline_remittance_inr_cr": 6.07, "depi_score": 60.9, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 58, "country": "Egypt", "iso3": "EGY", "region": "Africa", "currency": "USD", "currency_to_usd": 1.0, "pios": 283, "nris": 5407, "total": 5690, "nri_pct": 95.0, "pio_pct": 5.0, "baseline_remittance_usd": 17315135, "baseline_remittance_local": 17315135.0, "baseline_remittance_inr_cr": 149.78, "depi_score": 73.2, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 59, "country": "El Salvador", "iso3": "SLV", "region": "Latin America & Caribbean", "currency": "USD", "currency_to_usd": 1.0, "pios": 25, "nris": 15, "total": 40, "nri_pct": 37.5, "pio_pct": 62.5, "baseline_remittance_usd": 31125, "baseline_remittance_local": 31125.0, "baseline_remittance_inr_cr": 0.27, "depi_score": 38.5, "narrative": "Balanced community of established diaspora citizens (PIOs) and active resident professionals (NRIs)."}, {"s_no": 60, "country": "Equatorial Guinea", "iso3": "GNQ", "region": "Africa", "currency": "USD", "currency_to_usd": 1.0, "pios": 0, "nris": 400, "total": 400, "nri_pct": 100.0, "pio_pct": 0.0, "baseline_remittance_usd": 1280000, "baseline_remittance_local": 1280000.0, "baseline_remittance_inr_cr": 11.07, "depi_score": 65.5, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 61, "country": "Eritrea", "iso3": "ERI", "region": "Africa", "currency": "USD", "currency_to_usd": 1.0, "pios": 0, "nris": 140, "total": 140, "nri_pct": 100.0, "pio_pct": 0.0, "baseline_remittance_usd": 448000, "baseline_remittance_local": 448000.0, "baseline_remittance_inr_cr": 3.88, "depi_score": 61.9, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 62, "country": "Estonia", "iso3": "EST", "region": "Europe", "currency": "EUR", "currency_to_usd": 0.92, "pios": 54, "nris": 2010, "total": 2064, "nri_pct": 97.4, "pio_pct": 2.6, "baseline_remittance_usd": 10454430, "baseline_remittance_local": 9618075.6, "baseline_remittance_inr_cr": 90.43, "depi_score": 71.6, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 63, "country": "Eswatini", "iso3": "SWZ", "region": "Africa", "currency": "USD", "currency_to_usd": 1.0, "pios": 200, "nris": 2300, "total": 2500, "nri_pct": 92.0, "pio_pct": 8.0, "baseline_remittance_usd": 7369000, "baseline_remittance_local": 7369000.0, "baseline_remittance_inr_cr": 63.74, "depi_score": 69.5, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 64, "country": "Ethiopia", "iso3": "ETH", "region": "Africa", "currency": "USD", "currency_to_usd": 1.0, "pios": 7, "nris": 2493, "total": 2500, "nri_pct": 99.7, "pio_pct": 0.3, "baseline_remittance_usd": 7977915, "baseline_remittance_local": 7977915.0, "baseline_remittance_inr_cr": 69.01, "depi_score": 71.6, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 65, "country": "Fiji", "iso3": "FJI", "region": "Asia-Pacific", "currency": "FJD", "currency_to_usd": 2.25, "pios": 316081, "nris": 2283, "total": 318364, "nri_pct": 0.7, "pio_pct": 99.3, "baseline_remittance_usd": 50000000, "baseline_remittance_local": 112500000.0, "baseline_remittance_inr_cr": 432.5, "depi_score": 56.0, "narrative": "Historic 19th-century colonial indentured migration hub. Deep cultural and linguistic ties, but minimal family maintenance remittances due to local citizenship."}, {"s_no": 66, "country": "Finland", "iso3": "FIN", "region": "Europe", "currency": "EUR", "currency_to_usd": 0.92, "pios": 18330, "nris": 15115, "total": 33445, "nri_pct": 45.2, "pio_pct": 54.8, "baseline_remittance_usd": 79422850, "baseline_remittance_local": 73069022.0, "baseline_remittance_inr_cr": 687.01, "depi_score": 66.1, "narrative": "Balanced community of established diaspora citizens (PIOs) and active resident professionals (NRIs)."}, {"s_no": 67, "country": "France", "iso3": "FRA", "region": "Europe", "currency": "EUR", "currency_to_usd": 0.92, "pios": 90000, "nris": 19000, "total": 109000, "nri_pct": 17.4, "pio_pct": 82.6, "baseline_remittance_usd": 900000000, "baseline_remittance_local": 828000000.0, "baseline_remittance_inr_cr": 7785.0, "depi_score": 66.3, "narrative": "Long-established multi-generational diaspora community integrated into the host nation's economic fabric."}, {"s_no": 68, "country": "France (Reunion Island)", "iso3": "REU", "region": "Africa", "currency": "EUR", "currency_to_usd": 0.92, "pios": 300000, "nris": 200, "total": 300200, "nri_pct": 0.1, "pio_pct": 99.9, "baseline_remittance_usd": 14140000, "baseline_remittance_local": 13008800.0, "baseline_remittance_inr_cr": 122.31, "depi_score": 52.6, "narrative": "Historic 19th-century colonial indentured migration hub. Deep cultural and linguistic ties, but minimal family maintenance remittances due to local citizenship."}, {"s_no": 69, "country": "France (Guadeloupe)", "iso3": "GLP", "region": "Latin America & Caribbean", "currency": "EUR", "currency_to_usd": 0.92, "pios": 57000, "nris": 180, "total": 57180, "nri_pct": 0.3, "pio_pct": 99.7, "baseline_remittance_usd": 2925000, "baseline_remittance_local": 2691000.0, "baseline_remittance_inr_cr": 25.3, "depi_score": 47.2, "narrative": "Historic 19th-century colonial indentured migration hub. Deep cultural and linguistic ties, but minimal family maintenance remittances due to local citizenship."}, {"s_no": 70, "country": "France (Martinique)", "iso3": "MTQ", "region": "Latin America & Caribbean", "currency": "EUR", "currency_to_usd": 0.92, "pios": 8000, "nris": 90, "total": 8090, "nri_pct": 1.1, "pio_pct": 98.9, "baseline_remittance_usd": 540000, "baseline_remittance_local": 496800.0, "baseline_remittance_inr_cr": 4.67, "depi_score": 41.4, "narrative": "Long-established multi-generational diaspora community integrated into the host nation's economic fabric."}, {"s_no": 71, "country": "France (St. Martin)", "iso3": "MAF", "region": "Latin America & Caribbean", "currency": "EUR", "currency_to_usd": 0.92, "pios": 1800, "nris": 150, "total": 1950, "nri_pct": 7.7, "pio_pct": 92.3, "baseline_remittance_usd": 381000, "baseline_remittance_local": 350520.0, "baseline_remittance_inr_cr": 3.3, "depi_score": 40.9, "narrative": "Long-established multi-generational diaspora community integrated into the host nation's economic fabric."}, {"s_no": 72, "country": "Gabon", "iso3": "GAB", "region": "Africa", "currency": "USD", "currency_to_usd": 1.0, "pios": 1, "nris": 800, "total": 801, "nri_pct": 99.9, "pio_pct": 0.1, "baseline_remittance_usd": 2560045, "baseline_remittance_local": 2560045.0, "baseline_remittance_inr_cr": 22.14, "depi_score": 67.8, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 74, "country": "Georgia", "iso3": "GEO", "region": "Europe", "currency": "USD", "currency_to_usd": 1.0, "pios": 4, "nris": 600, "total": 604, "nri_pct": 99.3, "pio_pct": 0.7, "baseline_remittance_usd": 3120180, "baseline_remittance_local": 3120180.0, "baseline_remittance_inr_cr": 26.99, "depi_score": 67.9, "narrative": "Rapidly expanding higher education and medical student hub, accompanied by emerging trade and technical services."}, {"s_no": 75, "country": "Germany", "iso3": "DEU", "region": "Europe", "currency": "EUR", "currency_to_usd": 0.92, "pios": 64013, "nris": 300000, "total": 364013, "nri_pct": 82.4, "pio_pct": 17.6, "baseline_remittance_usd": 2850000000, "baseline_remittance_local": 2622000000.0, "baseline_remittance_inr_cr": 24652.5, "depi_score": 86.5, "narrative": "High-income STEM, medical, finance, and corporate management corridor. Generates large per-capita transfers, venture funding, and wealth deposits."}, {"s_no": 76, "country": "Ghana", "iso3": "GHA", "region": "Africa", "currency": "USD", "currency_to_usd": 1.0, "pios": 332, "nris": 308, "total": 640, "nri_pct": 48.1, "pio_pct": 51.9, "baseline_remittance_usd": 1000540, "baseline_remittance_local": 1000540.0, "baseline_remittance_inr_cr": 8.65, "depi_score": 52.3, "narrative": "Balanced community of established diaspora citizens (PIOs) and active resident professionals (NRIs)."}, {"s_no": 77, "country": "Greece", "iso3": "GRC", "region": "Europe", "currency": "EUR", "currency_to_usd": 0.92, "pios": 158, "nris": 11333, "total": 11491, "nri_pct": 98.6, "pio_pct": 1.4, "baseline_remittance_usd": 58938710, "baseline_remittance_local": 54223613.2, "baseline_remittance_inr_cr": 509.82, "depi_score": 77.8, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 78, "country": "Grenada", "iso3": "GRD", "region": "Latin America & Caribbean", "currency": "USD", "currency_to_usd": 1.0, "pios": 12000, "nris": 800, "total": 12800, "nri_pct": 6.2, "pio_pct": 93.8, "baseline_remittance_usd": 2140000, "baseline_remittance_local": 2140000.0, "baseline_remittance_inr_cr": 18.51, "depi_score": 46.5, "narrative": "Long-established multi-generational diaspora community integrated into the host nation's economic fabric."}, {"s_no": 79, "country": "Guatemala", "iso3": "GTM", "region": "Latin America & Caribbean", "currency": "USD", "currency_to_usd": 1.0, "pios": 350, "nris": 60, "total": 410, "nri_pct": 14.6, "pio_pct": 85.4, "baseline_remittance_usd": 135750, "baseline_remittance_local": 135750.0, "baseline_remittance_inr_cr": 1.17, "depi_score": 38.6, "narrative": "Long-established multi-generational diaspora community integrated into the host nation's economic fabric."}, {"s_no": 80, "country": "Guinea (Republic of)", "iso3": "GIN", "region": "Rest of World", "currency": "USD", "currency_to_usd": 1.0, "pios": 0, "nris": 2500, "total": 2500, "nri_pct": 100.0, "pio_pct": 0.0, "baseline_remittance_usd": 7000000, "baseline_remittance_local": 7000000.0, "baseline_remittance_inr_cr": 60.55, "depi_score": 71.4, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 82, "country": "Guyana", "iso3": "GUY", "region": "Latin America & Caribbean", "currency": "GYD", "currency_to_usd": 209.0, "pios": 322000, "nris": 2000, "total": 324000, "nri_pct": 0.6, "pio_pct": 99.4, "baseline_remittance_usd": 25000000, "baseline_remittance_local": 5225000000.0, "baseline_remittance_inr_cr": 216.25, "depi_score": 54.2, "narrative": "Historic 19th-century colonial indentured migration hub. Deep cultural and linguistic ties, but minimal family maintenance remittances due to local citizenship."}, {"s_no": 83, "country": "Haiti", "iso3": "HTI", "region": "Latin America & Caribbean", "currency": "USD", "currency_to_usd": 1.0, "pios": 1, "nris": 114, "total": 115, "nri_pct": 99.1, "pio_pct": 0.9, "baseline_remittance_usd": 228045, "baseline_remittance_local": 228045.0, "baseline_remittance_inr_cr": 1.97, "depi_score": 59.8, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 84, "country": "Holy See", "iso3": "VAT", "region": "Europe", "currency": "EUR", "currency_to_usd": 0.92, "pios": 30, "nris": 15, "total": 45, "nri_pct": 33.3, "pio_pct": 66.7, "baseline_remittance_usd": 79350, "baseline_remittance_local": 73002.0, "baseline_remittance_inr_cr": 0.69, "depi_score": 39.9, "narrative": "Balanced community of established diaspora citizens (PIOs) and active resident professionals (NRIs)."}, {"s_no": 85, "country": "Honduras", "iso3": "HND", "region": "Latin America & Caribbean", "currency": "USD", "currency_to_usd": 1.0, "pios": 25, "nris": 20, "total": 45, "nri_pct": 44.4, "pio_pct": 55.6, "baseline_remittance_usd": 41125, "baseline_remittance_local": 41125.0, "baseline_remittance_inr_cr": 0.36, "depi_score": 41.0, "narrative": "Balanced community of established diaspora citizens (PIOs) and active resident professionals (NRIs)."}, {"s_no": 86, "country": "Hungary", "iso3": "HUN", "region": "Europe", "currency": "USD", "currency_to_usd": 1.0, "pios": 1000, "nris": 8700, "total": 9700, "nri_pct": 89.7, "pio_pct": 10.3, "baseline_remittance_usd": 45285000, "baseline_remittance_local": 45285000.0, "baseline_remittance_inr_cr": 391.72, "depi_score": 74.7, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 87, "country": "Iceland", "iso3": "ISL", "region": "Europe", "currency": "USD", "currency_to_usd": 1.0, "pios": 237, "nris": 509, "total": 746, "nri_pct": 68.2, "pio_pct": 31.8, "baseline_remittance_usd": 2657465, "baseline_remittance_local": 2657465.0, "baseline_remittance_inr_cr": 22.99, "depi_score": 59.9, "narrative": "Balanced community of established diaspora citizens (PIOs) and active resident professionals (NRIs)."}, {"s_no": 88, "country": "Indonesia", "iso3": "IDN", "region": "Asia-Pacific", "currency": "USD", "currency_to_usd": 1.0, "pios": 5289, "nris": 1962, "total": 7251, "nri_pct": 27.1, "pio_pct": 72.9, "baseline_remittance_usd": 9655605, "baseline_remittance_local": 9655605.0, "baseline_remittance_inr_cr": 83.52, "depi_score": 55.0, "narrative": "Balanced community of established diaspora citizens (PIOs) and active resident professionals (NRIs)."}, {"s_no": 89, "country": "Iran", "iso3": "IRN", "region": "GCC & Middle East", "currency": "USD", "currency_to_usd": 1.0, "pios": 488, "nris": 9000, "total": 9488, "nri_pct": 94.9, "pio_pct": 5.1, "baseline_remittance_usd": 25221960, "baseline_remittance_local": 25221960.0, "baseline_remittance_inr_cr": 218.17, "depi_score": 74.5, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 90, "country": "Iraq", "iso3": "IRQ", "region": "GCC & Middle East", "currency": "USD", "currency_to_usd": 1.0, "pios": 4, "nris": 8000, "total": 8004, "nri_pct": 100.0, "pio_pct": 0.0, "baseline_remittance_usd": 22400180, "baseline_remittance_local": 22400180.0, "baseline_remittance_inr_cr": 193.76, "depi_score": 75.4, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 91, "country": "Ireland", "iso3": "IRL", "region": "Europe", "currency": "EUR", "currency_to_usd": 0.92, "pios": 38000, "nris": 45000, "total": 83000, "nri_pct": 54.2, "pio_pct": 45.8, "baseline_remittance_usd": 920000000, "baseline_remittance_local": 846400000.0, "baseline_remittance_inr_cr": 7958.0, "depi_score": 75.3, "narrative": "Balanced community of established diaspora citizens (PIOs) and active resident professionals (NRIs)."}, {"s_no": 92, "country": "Israel", "iso3": "ISR", "region": "GCC & Middle East", "currency": "USD", "currency_to_usd": 1.0, "pios": 100000, "nris": 42000, "total": 142000, "nri_pct": 29.6, "pio_pct": 70.4, "baseline_remittance_usd": 122100000, "baseline_remittance_local": 122100000.0, "baseline_remittance_inr_cr": 1056.16, "depi_score": 64.7, "narrative": "Balanced community of established diaspora citizens (PIOs) and active resident professionals (NRIs)."}, {"s_no": 93, "country": "Italy", "iso3": "ITA", "region": "Europe", "currency": "EUR", "currency_to_usd": 0.92, "pios": 79620, "nris": 171429, "total": 251049, "nri_pct": 68.3, "pio_pct": 31.7, "baseline_remittance_usd": 1350000000, "baseline_remittance_local": 1242000000.0, "baseline_remittance_inr_cr": 11677.5, "depi_score": 80.8, "narrative": "Balanced community of established diaspora citizens (PIOs) and active resident professionals (NRIs)."}, {"s_no": 94, "country": "Jamaica", "iso3": "JAM", "region": "Latin America & Caribbean", "currency": "USD", "currency_to_usd": 1.0, "pios": 70000, "nris": 5000, "total": 75000, "nri_pct": 6.7, "pio_pct": 93.3, "baseline_remittance_usd": 13150000, "baseline_remittance_local": 13150000.0, "baseline_remittance_inr_cr": 113.75, "depi_score": 52.8, "narrative": "Long-established multi-generational diaspora community integrated into the host nation's economic fabric."}, {"s_no": 95, "country": "Japan", "iso3": "JPN", "region": "Asia-Pacific", "currency": "JPY", "currency_to_usd": 152.0, "pios": 1761, "nris": 65126, "total": 66887, "nri_pct": 97.4, "pio_pct": 2.6, "baseline_remittance_usd": 520000000, "baseline_remittance_local": 79040000000.0, "baseline_remittance_inr_cr": 4498.0, "depi_score": 84.5, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 96, "country": "Jordan", "iso3": "JOR", "region": "GCC & Middle East", "currency": "USD", "currency_to_usd": 1.0, "pios": 153, "nris": 18787, "total": 18940, "nri_pct": 99.2, "pio_pct": 0.8, "baseline_remittance_usd": 52610485, "baseline_remittance_local": 52610485.0, "baseline_remittance_inr_cr": 455.08, "depi_score": 78.1, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 97, "country": "Kazakhstan", "iso3": "KAZ", "region": "Central Asia", "currency": "USD", "currency_to_usd": 1.0, "pios": 0, "nris": 7956, "total": 7956, "nri_pct": 100.0, "pio_pct": 0.0, "baseline_remittance_usd": 17503200, "baseline_remittance_local": 17503200.0, "baseline_remittance_inr_cr": 151.4, "depi_score": 74.7, "narrative": "Rapidly expanding higher education and medical student hub, accompanied by emerging trade and technical services."}, {"s_no": 98, "country": "Kenya", "iso3": "KEN", "region": "Africa", "currency": "USD", "currency_to_usd": 1.0, "pios": 60000, "nris": 20000, "total": 80000, "nri_pct": 25.0, "pio_pct": 75.0, "baseline_remittance_usd": 66700000, "baseline_remittance_local": 66700000.0, "baseline_remittance_inr_cr": 576.96, "depi_score": 61.5, "narrative": "Balanced community of established diaspora citizens (PIOs) and active resident professionals (NRIs)."}, {"s_no": 99, "country": "Kiribati", "iso3": "KIR", "region": "Asia-Pacific", "currency": "USD", "currency_to_usd": 1.0, "pios": 50, "nris": 2, "total": 52, "nri_pct": 3.8, "pio_pct": 96.2, "baseline_remittance_usd": 11850, "baseline_remittance_local": 11850.0, "baseline_remittance_inr_cr": 0.1, "depi_score": 27.9, "narrative": "Long-established multi-generational diaspora community integrated into the host nation's economic fabric."}, {"s_no": 100, "country": "Korea (DPR)", "iso3": "PRK", "region": "Asia-Pacific", "currency": "USD", "currency_to_usd": 1.0, "pios": 1, "nris": 15, "total": 16, "nri_pct": 93.8, "pio_pct": 6.2, "baseline_remittance_usd": 72045, "baseline_remittance_local": 72045.0, "baseline_remittance_inr_cr": 0.62, "depi_score": 53.8, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 101, "country": "Korea (ROK)", "iso3": "KOR", "region": "Asia-Pacific", "currency": "USD", "currency_to_usd": 1.0, "pios": 479, "nris": 17995, "total": 18474, "nri_pct": 97.4, "pio_pct": 2.6, "baseline_remittance_usd": 86397555, "baseline_remittance_local": 86397555.0, "baseline_remittance_inr_cr": 747.34, "depi_score": 78.8, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 102, "country": "Kuwait", "iso3": "KWT", "region": "GCC & Middle East", "currency": "KWD", "currency_to_usd": 0.31, "pios": 2356, "nris": 1036389, "total": 1038745, "nri_pct": 99.8, "pio_pct": 0.2, "baseline_remittance_usd": 5200000000, "baseline_remittance_local": 1612000000.0, "baseline_remittance_inr_cr": 44980.0, "depi_score": 93.4, "narrative": "Major Gulf labor and trade corridor; 99% NRI workforce with exceptionally high remittance frequency for family maintenance and NRE bank deposits."}, {"s_no": 103, "country": "Kyrgyzstan", "iso3": "KGZ", "region": "Central Asia", "currency": "USD", "currency_to_usd": 1.0, "pios": 70, "nris": 200, "total": 270, "nri_pct": 74.1, "pio_pct": 25.9, "baseline_remittance_usd": 443150, "baseline_remittance_local": 443150.0, "baseline_remittance_inr_cr": 3.83, "depi_score": 56.0, "narrative": "Rapidly expanding higher education and medical student hub, accompanied by emerging trade and technical services."}, {"s_no": 104, "country": "Laos", "iso3": "LAO", "region": "Asia-Pacific", "currency": "USD", "currency_to_usd": 1.0, "pios": 122, "nris": 600, "total": 722, "nri_pct": 83.1, "pio_pct": 16.9, "baseline_remittance_usd": 2885490, "baseline_remittance_local": 2885490.0, "baseline_remittance_inr_cr": 24.96, "depi_score": 63.8, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 105, "country": "Latvia", "iso3": "LVA", "region": "Europe", "currency": "EUR", "currency_to_usd": 0.92, "pios": 0, "nris": 6123, "total": 6123, "nri_pct": 100.0, "pio_pct": 0.0, "baseline_remittance_usd": 31839600, "baseline_remittance_local": 29292432.0, "baseline_remittance_inr_cr": 275.41, "depi_score": 76.0, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 106, "country": "Lebanon", "iso3": "LBN", "region": "GCC & Middle East", "currency": "USD", "currency_to_usd": 1.0, "pios": 40, "nris": 2000, "total": 2040, "nri_pct": 98.0, "pio_pct": 2.0, "baseline_remittance_usd": 5601800, "baseline_remittance_local": 5601800.0, "baseline_remittance_inr_cr": 48.46, "depi_score": 70.2, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 107, "country": "Lesotho (Kingdom of)", "iso3": "LSO", "region": "Africa", "currency": "USD", "currency_to_usd": 1.0, "pios": 1500, "nris": 1500, "total": 3000, "nri_pct": 50.0, "pio_pct": 50.0, "baseline_remittance_usd": 4867500, "baseline_remittance_local": 4867500.0, "baseline_remittance_inr_cr": 42.1, "depi_score": 58.2, "narrative": "Balanced community of established diaspora citizens (PIOs) and active resident professionals (NRIs)."}, {"s_no": 108, "country": "Liberia", "iso3": "LBR", "region": "Africa", "currency": "USD", "currency_to_usd": 1.0, "pios": 2, "nris": 3700, "total": 3702, "nri_pct": 99.9, "pio_pct": 0.1, "baseline_remittance_usd": 11840090, "baseline_remittance_local": 11840090.0, "baseline_remittance_inr_cr": 102.42, "depi_score": 73.0, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 109, "country": "Libya", "iso3": "LBY", "region": "Africa", "currency": "USD", "currency_to_usd": 1.0, "pios": 0, "nris": 3000, "total": 3000, "nri_pct": 100.0, "pio_pct": 0.0, "baseline_remittance_usd": 9600000, "baseline_remittance_local": 9600000.0, "baseline_remittance_inr_cr": 83.04, "depi_score": 72.3, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 110, "country": "Liechtenstein", "iso3": "LIE", "region": "Europe", "currency": "USD", "currency_to_usd": 1.0, "pios": 52, "nris": 36, "total": 88, "nri_pct": 40.9, "pio_pct": 59.1, "baseline_remittance_usd": 189540, "baseline_remittance_local": 189540.0, "baseline_remittance_inr_cr": 1.64, "depi_score": 44.6, "narrative": "Balanced community of established diaspora citizens (PIOs) and active resident professionals (NRIs)."}, {"s_no": 111, "country": "Lithuania", "iso3": "LTU", "region": "Europe", "currency": "EUR", "currency_to_usd": 0.92, "pios": 34, "nris": 7835, "total": 7862, "nri_pct": 99.7, "pio_pct": 0.4, "baseline_remittance_usd": 40743530, "baseline_remittance_local": 37484047.6, "baseline_remittance_inr_cr": 352.43, "depi_score": 76.8, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 112, "country": "Luxembourg", "iso3": "LUX", "region": "Europe", "currency": "EUR", "currency_to_usd": 0.92, "pios": 1202, "nris": 4835, "total": 6037, "nri_pct": 80.1, "pio_pct": 19.9, "baseline_remittance_usd": 25196090, "baseline_remittance_local": 23180402.8, "baseline_remittance_inr_cr": 217.95, "depi_score": 70.4, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 113, "country": "Madagascar", "iso3": "MDG", "region": "Africa", "currency": "USD", "currency_to_usd": 1.0, "pios": 15000, "nris": 2500, "total": 17500, "nri_pct": 14.3, "pio_pct": 85.7, "baseline_remittance_usd": 8675000, "baseline_remittance_local": 8675000.0, "baseline_remittance_inr_cr": 75.04, "depi_score": 52.3, "narrative": "Long-established multi-generational diaspora community integrated into the host nation's economic fabric."}, {"s_no": 114, "country": "Malawi", "iso3": "MWI", "region": "Africa", "currency": "USD", "currency_to_usd": 1.0, "pios": 8500, "nris": 9000, "total": 17500, "nri_pct": 51.4, "pio_pct": 48.6, "baseline_remittance_usd": 29182500, "baseline_remittance_local": 29182500.0, "baseline_remittance_inr_cr": 252.43, "depi_score": 64.6, "narrative": "Balanced community of established diaspora citizens (PIOs) and active resident professionals (NRIs)."}, {"s_no": 115, "country": "Malaysia", "iso3": "MYS", "region": "Asia-Pacific", "currency": "MYR", "currency_to_usd": 4.45, "pios": 2750000, "nris": 152370, "total": 2902370, "nri_pct": 5.2, "pio_pct": 94.8, "baseline_remittance_usd": 1050000000, "baseline_remittance_local": 4672500000.0, "baseline_remittance_inr_cr": 9082.5, "depi_score": 66.7, "narrative": "Long-established multi-generational diaspora community integrated into the host nation's economic fabric."}, {"s_no": 116, "country": "Maldives", "iso3": "MDV", "region": "Asia-Pacific", "currency": "USD", "currency_to_usd": 1.0, "pios": 141, "nris": 59725, "total": 59866, "nri_pct": 99.8, "pio_pct": 0.2, "baseline_remittance_usd": 286686345, "baseline_remittance_local": 286686345.0, "baseline_remittance_inr_cr": 2479.84, "depi_score": 83.5, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 117, "country": "Mali", "iso3": "MLI", "region": "Africa", "currency": "USD", "currency_to_usd": 1.0, "pios": 13, "nris": 569, "total": 582, "nri_pct": 97.8, "pio_pct": 2.2, "baseline_remittance_usd": 1821385, "baseline_remittance_local": 1821385.0, "baseline_remittance_inr_cr": 15.75, "depi_score": 66.1, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 118, "country": "Malta", "iso3": "MLT", "region": "Europe", "currency": "EUR", "currency_to_usd": 0.92, "pios": 250, "nris": 18000, "total": 18250, "nri_pct": 98.6, "pio_pct": 1.4, "baseline_remittance_usd": 93611250, "baseline_remittance_local": 86122350.0, "baseline_remittance_inr_cr": 809.74, "depi_score": 79.3, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 119, "country": "Marshall Island", "iso3": "MHL", "region": "Asia-Pacific", "currency": "USD", "currency_to_usd": 1.0, "pios": 2, "nris": 4, "total": 6, "nri_pct": 66.7, "pio_pct": 33.3, "baseline_remittance_usd": 19290, "baseline_remittance_local": 19290.0, "baseline_remittance_inr_cr": 0.17, "depi_score": 43.3, "narrative": "Balanced community of established diaspora citizens (PIOs) and active resident professionals (NRIs)."}, {"s_no": 120, "country": "Mauritania", "iso3": "MRT", "region": "Africa", "currency": "USD", "currency_to_usd": 1.0, "pios": 0, "nris": 150, "total": 150, "nri_pct": 100.0, "pio_pct": 0.0, "baseline_remittance_usd": 480000, "baseline_remittance_local": 480000.0, "baseline_remittance_inr_cr": 4.15, "depi_score": 62.1, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 121, "country": "Mauritius", "iso3": "MUS", "region": "Africa", "currency": "MUR", "currency_to_usd": 46.5, "pios": 864911, "nris": 26786, "total": 891697, "nri_pct": 3.0, "pio_pct": 97.0, "baseline_remittance_usd": 150000000, "baseline_remittance_local": 6975000000.0, "baseline_remittance_inr_cr": 1297.5, "depi_score": 60.2, "narrative": "Historic 19th-century colonial indentured migration hub. Deep cultural and linguistic ties, but minimal family maintenance remittances due to local citizenship."}, {"s_no": 122, "country": "Micronesia", "iso3": "FSM", "region": "Asia-Pacific", "currency": "USD", "currency_to_usd": 1.0, "pios": 0, "nris": 35, "total": 35, "nri_pct": 100.0, "pio_pct": 0.0, "baseline_remittance_usd": 168000, "baseline_remittance_local": 168000.0, "baseline_remittance_inr_cr": 1.45, "depi_score": 58.2, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 123, "country": "Mexico", "iso3": "MEX", "region": "North America", "currency": "USD", "currency_to_usd": 1.0, "pios": 2000, "nris": 8000, "total": 10000, "nri_pct": 80.0, "pio_pct": 20.0, "baseline_remittance_usd": 38490000, "baseline_remittance_local": 38490000.0, "baseline_remittance_inr_cr": 332.94, "depi_score": 71.9, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 124, "country": "Moldova", "iso3": "MDA", "region": "Europe", "currency": "USD", "currency_to_usd": 1.0, "pios": 9, "nris": 1351, "total": 1360, "nri_pct": 99.3, "pio_pct": 0.7, "baseline_remittance_usd": 7025605, "baseline_remittance_local": 7025605.0, "baseline_remittance_inr_cr": 60.77, "depi_score": 70.7, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 125, "country": "Monaco", "iso3": "MCO", "region": "Europe", "currency": "EUR", "currency_to_usd": 0.92, "pios": 43, "nris": 10, "total": 53, "nri_pct": 18.9, "pio_pct": 81.1, "baseline_remittance_usd": 53935, "baseline_remittance_local": 49620.2, "baseline_remittance_inr_cr": 0.47, "depi_score": 35.5, "narrative": "Long-established multi-generational diaspora community integrated into the host nation's economic fabric."}, {"s_no": 126, "country": "Mongolia", "iso3": "MNG", "region": "Asia-Pacific", "currency": "USD", "currency_to_usd": 1.0, "pios": 9, "nris": 93, "total": 102, "nri_pct": 91.2, "pio_pct": 8.8, "baseline_remittance_usd": 446805, "baseline_remittance_local": 446805.0, "baseline_remittance_inr_cr": 3.86, "depi_score": 59.4, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 127, "country": "Montserrat", "iso3": "MSR", "region": "Latin America & Caribbean", "currency": "USD", "currency_to_usd": 1.0, "pios": 0, "nris": 50, "total": 50, "nri_pct": 100.0, "pio_pct": 0.0, "baseline_remittance_usd": 100000, "baseline_remittance_local": 100000.0, "baseline_remittance_inr_cr": 0.86, "depi_score": 57.2, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 128, "country": "Morocco", "iso3": "MAR", "region": "Africa", "currency": "USD", "currency_to_usd": 1.0, "pios": 101, "nris": 1267, "total": 1368, "nri_pct": 92.6, "pio_pct": 7.4, "baseline_remittance_usd": 4058945, "baseline_remittance_local": 4058945.0, "baseline_remittance_inr_cr": 35.11, "depi_score": 67.6, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 129, "country": "Mozambique", "iso3": "MOZ", "region": "Africa", "currency": "USD", "currency_to_usd": 1.0, "pios": 22000, "nris": 3000, "total": 25000, "nri_pct": 12.0, "pio_pct": 88.0, "baseline_remittance_usd": 10590000, "baseline_remittance_local": 10590000.0, "baseline_remittance_inr_cr": 91.6, "depi_score": 52.6, "narrative": "Long-established multi-generational diaspora community integrated into the host nation's economic fabric."}, {"s_no": 130, "country": "Myanmar", "iso3": "MMR", "region": "Asia-Pacific", "currency": "USD", "currency_to_usd": 1.0, "pios": 1997500, "nris": 2500, "total": 2000000, "nri_pct": 0.1, "pio_pct": 99.9, "baseline_remittance_usd": 101887500, "baseline_remittance_local": 101887500.0, "baseline_remittance_inr_cr": 881.33, "depi_score": 59.3, "narrative": "Long-established multi-generational diaspora community integrated into the host nation's economic fabric."}, {"s_no": 131, "country": "Namibia", "iso3": "NAM", "region": "Africa", "currency": "USD", "currency_to_usd": 1.0, "pios": 0, "nris": 65, "total": 65, "nri_pct": 100.0, "pio_pct": 0.0, "baseline_remittance_usd": 208000, "baseline_remittance_local": 208000.0, "baseline_remittance_inr_cr": 1.8, "depi_score": 59.3, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 132, "country": "Nauru", "iso3": "NRU", "region": "Asia-Pacific", "currency": "USD", "currency_to_usd": 1.0, "pios": 0, "nris": 20, "total": 20, "nri_pct": 100.0, "pio_pct": 0.0, "baseline_remittance_usd": 96000, "baseline_remittance_local": 96000.0, "baseline_remittance_inr_cr": 0.83, "depi_score": 56.3, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 133, "country": "Nepal", "iso3": "NPL", "region": "Asia-Pacific", "currency": "USD", "currency_to_usd": 1.0, "pios": 0, "nris": 700000, "total": 700000, "nri_pct": 100.0, "pio_pct": 0.0, "baseline_remittance_usd": 3360000000, "baseline_remittance_local": 3360000000.0, "baseline_remittance_inr_cr": 29064.0, "depi_score": 92.0, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 134, "country": "Netherlands", "iso3": "NLD", "region": "Europe", "currency": "EUR", "currency_to_usd": 0.92, "pios": 178035, "nris": 55965, "total": 234000, "nri_pct": 23.9, "pio_pct": 76.1, "baseline_remittance_usd": 1050000000, "baseline_remittance_local": 966000000.0, "baseline_remittance_inr_cr": 9082.5, "depi_score": 69.0, "narrative": "Long-established multi-generational diaspora community integrated into the host nation's economic fabric."}, {"s_no": 135, "country": "New Zealand", "iso3": "NZL", "region": "Asia-Pacific", "currency": "NZD", "currency_to_usd": 1.68, "pios": 143000, "nris": 157000, "total": 300000, "nri_pct": 52.3, "pio_pct": 47.7, "baseline_remittance_usd": 840000000, "baseline_remittance_local": 1411200000.0, "baseline_remittance_inr_cr": 7266.0, "depi_score": 75.8, "narrative": "Balanced community of established diaspora citizens (PIOs) and active resident professionals (NRIs)."}, {"s_no": 136, "country": "Nicaragua", "iso3": "NIC", "region": "Latin America & Caribbean", "currency": "USD", "currency_to_usd": 1.0, "pios": 1, "nris": 39, "total": 40, "nri_pct": 97.5, "pio_pct": 2.5, "baseline_remittance_usd": 78045, "baseline_remittance_local": 78045.0, "baseline_remittance_inr_cr": 0.68, "depi_score": 55.8, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 137, "country": "Niger", "iso3": "NER", "region": "Africa", "currency": "USD", "currency_to_usd": 1.0, "pios": 10, "nris": 240, "total": 250, "nri_pct": 96.0, "pio_pct": 4.0, "baseline_remittance_usd": 768450, "baseline_remittance_local": 768450.0, "baseline_remittance_inr_cr": 6.65, "depi_score": 62.8, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 138, "country": "Nigeria", "iso3": "NGA", "region": "Africa", "currency": "USD", "currency_to_usd": 1.0, "pios": 120, "nris": 50000, "total": 50120, "nri_pct": 99.8, "pio_pct": 0.2, "baseline_remittance_usd": 160005400, "baseline_remittance_local": 160005400.0, "baseline_remittance_inr_cr": 1384.05, "depi_score": 81.9, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 139, "country": "North Macedonia", "iso3": "MKD", "region": "Europe", "currency": "USD", "currency_to_usd": 1.0, "pios": 9, "nris": 43, "total": 52, "nri_pct": 82.7, "pio_pct": 17.3, "baseline_remittance_usd": 224005, "baseline_remittance_local": 224005.0, "baseline_remittance_inr_cr": 1.94, "depi_score": 54.9, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 140, "country": "Norway", "iso3": "NOR", "region": "Europe", "currency": "USD", "currency_to_usd": 1.0, "pios": 13516, "nris": 11542, "total": 25058, "nri_pct": 46.1, "pio_pct": 53.9, "baseline_remittance_usd": 310000000, "baseline_remittance_local": 310000000.0, "baseline_remittance_inr_cr": 2681.5, "depi_score": 69.5, "narrative": "Balanced community of established diaspora citizens (PIOs) and active resident professionals (NRIs)."}, {"s_no": 141, "country": "Oman", "iso3": "OMN", "region": "GCC & Middle East", "currency": "OMR", "currency_to_usd": 0.385, "pios": 2056, "nris": 676781, "total": 678837, "nri_pct": 99.7, "pio_pct": 0.3, "baseline_remittance_usd": 3100000000, "baseline_remittance_local": 1193500000.0, "baseline_remittance_inr_cr": 26815.0, "depi_score": 91.7, "narrative": "Major Gulf labor and trade corridor; 99% NRI workforce with exceptionally high remittance frequency for family maintenance and NRE bank deposits."}, {"s_no": 142, "country": "Pakistan", "iso3": "PAK", "region": "Asia-Pacific", "currency": "USD", "currency_to_usd": 1.0, "pios": 0, "nris": 0, "total": 0, "nri_pct": 0.0, "pio_pct": 0.0, "baseline_remittance_usd": 0, "baseline_remittance_local": 0.0, "baseline_remittance_inr_cr": 0.0, "depi_score": 19.3, "narrative": "Balanced community of established diaspora citizens (PIOs) and active resident professionals (NRIs)."}, {"s_no": 143, "country": "Palau", "iso3": "PLW", "region": "Asia-Pacific", "currency": "USD", "currency_to_usd": 1.0, "pios": 0, "nris": 29, "total": 29, "nri_pct": 100.0, "pio_pct": 0.0, "baseline_remittance_usd": 139200, "baseline_remittance_local": 139200.0, "baseline_remittance_inr_cr": 1.2, "depi_score": 57.5, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 144, "country": "Palestine", "iso3": "PSE", "region": "GCC & Middle East", "currency": "USD", "currency_to_usd": 1.0, "pios": 0, "nris": 7, "total": 2, "nri_pct": 350.0, "pio_pct": 0.0, "baseline_remittance_usd": 19600, "baseline_remittance_local": 19600.0, "baseline_remittance_inr_cr": 0.17, "depi_score": 114.2, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 145, "country": "Panama", "iso3": "PAN", "region": "Latin America & Caribbean", "currency": "USD", "currency_to_usd": 1.0, "pios": 11173, "nris": 4000, "total": 15173, "nri_pct": 26.4, "pio_pct": 73.6, "baseline_remittance_usd": 8502785, "baseline_remittance_local": 8502785.0, "baseline_remittance_inr_cr": 73.55, "depi_score": 55.2, "narrative": "Balanced community of established diaspora citizens (PIOs) and active resident professionals (NRIs)."}, {"s_no": 146, "country": "Papua New Guinea", "iso3": "PNG", "region": "Asia-Pacific", "currency": "USD", "currency_to_usd": 1.0, "pios": 0, "nris": 4000, "total": 4000, "nri_pct": 100.0, "pio_pct": 0.0, "baseline_remittance_usd": 19200000, "baseline_remittance_local": 19200000.0, "baseline_remittance_inr_cr": 166.08, "depi_score": 74.3, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 147, "country": "Paraguay", "iso3": "PRY", "region": "Latin America & Caribbean", "currency": "USD", "currency_to_usd": 1.0, "pios": 200, "nris": 400, "total": 600, "nri_pct": 66.7, "pio_pct": 33.3, "baseline_remittance_usd": 809000, "baseline_remittance_local": 809000.0, "baseline_remittance_inr_cr": 7.0, "depi_score": 56.4, "narrative": "Balanced community of established diaspora citizens (PIOs) and active resident professionals (NRIs)."}, {"s_no": 148, "country": "Peru", "iso3": "PER", "region": "Latin America & Caribbean", "currency": "USD", "currency_to_usd": 1.0, "pios": 175, "nris": 325, "total": 500, "nri_pct": 65.0, "pio_pct": 35.0, "baseline_remittance_usd": 657875, "baseline_remittance_local": 657875.0, "baseline_remittance_inr_cr": 5.69, "depi_score": 55.3, "narrative": "Balanced community of established diaspora citizens (PIOs) and active resident professionals (NRIs)."}, {"s_no": 149, "country": "Philippines", "iso3": "PHL", "region": "Asia-Pacific", "currency": "USD", "currency_to_usd": 1.0, "pios": 2570, "nris": 67430, "total": 70000, "nri_pct": 96.3, "pio_pct": 3.7, "baseline_remittance_usd": 323779650, "baseline_remittance_local": 323779650.0, "baseline_remittance_inr_cr": 2800.69, "depi_score": 83.1, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 150, "country": "Poland", "iso3": "POL", "region": "Europe", "currency": "USD", "currency_to_usd": 1.0, "pios": 1300, "nris": 30000, "total": 31300, "nri_pct": 95.8, "pio_pct": 4.2, "baseline_remittance_usd": 300000000, "baseline_remittance_local": 300000000.0, "baseline_remittance_inr_cr": 2595.0, "depi_score": 82.0, "narrative": "Emerging European workforce destination in logistics, construction, and hospitality sectors with fast-growing NRI registrations."}, {"s_no": 151, "country": "Portugal", "iso3": "PRT", "region": "Europe", "currency": "EUR", "currency_to_usd": 0.92, "pios": 78000, "nris": 98616, "total": 176616, "nri_pct": 55.8, "pio_pct": 44.2, "baseline_remittance_usd": 516313200, "baseline_remittance_local": 475008144.0, "baseline_remittance_inr_cr": 4466.11, "depi_score": 75.0, "narrative": "Balanced community of established diaspora citizens (PIOs) and active resident professionals (NRIs)."}, {"s_no": 152, "country": "Qatar", "iso3": "QAT", "region": "GCC & Middle East", "currency": "QAR", "currency_to_usd": 3.64, "pios": 0, "nris": 830491, "total": 830491, "nri_pct": 100.0, "pio_pct": 0.0, "baseline_remittance_usd": 4600000000, "baseline_remittance_local": 16744000000.0, "baseline_remittance_inr_cr": 39790.0, "depi_score": 92.9, "narrative": "Major Gulf labor and trade corridor; 99% NRI workforce with exceptionally high remittance frequency for family maintenance and NRE bank deposits."}, {"s_no": 153, "country": "Romania", "iso3": "ROU", "region": "Europe", "currency": "USD", "currency_to_usd": 1.0, "pios": 362, "nris": 13099, "total": 13461, "nri_pct": 97.3, "pio_pct": 2.7, "baseline_remittance_usd": 68131090, "baseline_remittance_local": 68131090.0, "baseline_remittance_inr_cr": 589.33, "depi_score": 77.9, "narrative": "Emerging European workforce destination in logistics, construction, and hospitality sectors with fast-growing NRI registrations."}, {"s_no": 154, "country": "Russia", "iso3": "RUS", "region": "Europe", "currency": "USD", "currency_to_usd": 1.0, "pios": 6, "nris": 2600, "total": 2606, "nri_pct": 99.8, "pio_pct": 0.2, "baseline_remittance_usd": 13520270, "baseline_remittance_local": 13520270.0, "baseline_remittance_inr_cr": 116.95, "depi_score": 73.0, "narrative": "Rapidly expanding higher education and medical student hub, accompanied by emerging trade and technical services."}, {"s_no": 155, "country": "Rwanda", "iso3": "RWA", "region": "Africa", "currency": "USD", "currency_to_usd": 1.0, "pios": 10, "nris": 3050, "total": 3056, "nri_pct": 99.8, "pio_pct": 0.3, "baseline_remittance_usd": 9760450, "baseline_remittance_local": 9760450.0, "baseline_remittance_inr_cr": 84.43, "depi_score": 72.4, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 156, "country": "Saint Kitts & Nevis", "iso3": "KNA", "region": "Latin America & Caribbean", "currency": "USD", "currency_to_usd": 1.0, "pios": 100, "nris": 500, "total": 600, "nri_pct": 83.3, "pio_pct": 16.7, "baseline_remittance_usd": 1004500, "baseline_remittance_local": 1004500.0, "baseline_remittance_inr_cr": 8.69, "depi_score": 61.1, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 157, "country": "Saint Lusia", "iso3": "LCA", "region": "Latin America & Caribbean", "currency": "USD", "currency_to_usd": 1.0, "pios": 4100, "nris": 450, "total": 4550, "nri_pct": 9.9, "pio_pct": 90.1, "baseline_remittance_usd": 1084500, "baseline_remittance_local": 1084500.0, "baseline_remittance_inr_cr": 9.38, "depi_score": 44.8, "narrative": "Long-established multi-generational diaspora community integrated into the host nation's economic fabric."}, {"s_no": 158, "country": "Saint Vincent & Grenadines", "iso3": "VCT", "region": "Latin America & Caribbean", "currency": "USD", "currency_to_usd": 1.0, "pios": 6500, "nris": 70, "total": 6570, "nri_pct": 1.1, "pio_pct": 98.9, "baseline_remittance_usd": 432500, "baseline_remittance_local": 432500.0, "baseline_remittance_inr_cr": 3.74, "depi_score": 40.7, "narrative": "Long-established multi-generational diaspora community integrated into the host nation's economic fabric."}, {"s_no": 159, "country": "Samoa", "iso3": "WSM", "region": "Asia-Pacific", "currency": "USD", "currency_to_usd": 1.0, "pios": 50, "nris": 0, "total": 50, "nri_pct": 0.0, "pio_pct": 100.0, "baseline_remittance_usd": 2250, "baseline_remittance_local": 2250.0, "baseline_remittance_inr_cr": 0.02, "depi_score": 22.8, "narrative": "Long-established multi-generational diaspora community integrated into the host nation's economic fabric."}, {"s_no": 160, "country": "San Marino", "iso3": "SMR", "region": "Europe", "currency": "EUR", "currency_to_usd": 0.92, "pios": 0, "nris": 1, "total": 1, "nri_pct": 100.0, "pio_pct": 0.0, "baseline_remittance_usd": 5200, "baseline_remittance_local": 4784.0, "baseline_remittance_inr_cr": 0.04, "depi_score": 48.4, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 161, "country": "Sao Tome", "iso3": "STP", "region": "Africa", "currency": "USD", "currency_to_usd": 1.0, "pios": 0, "nris": 38, "total": 38, "nri_pct": 100.0, "pio_pct": 0.0, "baseline_remittance_usd": 121600, "baseline_remittance_local": 121600.0, "baseline_remittance_inr_cr": 1.05, "depi_score": 57.4, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 162, "country": "Saudi Arabia", "iso3": "SAU", "region": "GCC & Middle East", "currency": "SAR", "currency_to_usd": 3.75, "pios": 3000, "nris": 2747551, "total": 2750551, "nri_pct": 99.9, "pio_pct": 0.1, "baseline_remittance_usd": 7600000000, "baseline_remittance_local": 28500000000.0, "baseline_remittance_inr_cr": 65740.0, "depi_score": 95.2, "narrative": "Major Gulf labor and trade corridor; 99% NRI workforce with exceptionally high remittance frequency for family maintenance and NRE bank deposits."}, {"s_no": 163, "country": "Senegal, Gambia and Guinea-Bissau", "iso3": "SEN", "region": "Africa", "currency": "USD", "currency_to_usd": 1.0, "pios": 40, "nris": 4500, "total": 4540, "nri_pct": 99.1, "pio_pct": 0.9, "baseline_remittance_usd": 14401800, "baseline_remittance_local": 14401800.0, "baseline_remittance_inr_cr": 124.58, "depi_score": 73.5, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 164, "country": "Serbia", "iso3": "SRB", "region": "Europe", "currency": "USD", "currency_to_usd": 1.0, "pios": 37, "nris": 6658, "total": 6658, "nri_pct": 100.0, "pio_pct": 0.6, "baseline_remittance_usd": 34623265, "baseline_remittance_local": 34623265.0, "baseline_remittance_inr_cr": 299.49, "depi_score": 76.3, "narrative": "Emerging European workforce destination in logistics, construction, and hospitality sectors with fast-growing NRI registrations."}, {"s_no": 165, "country": "Seychelles", "iso3": "SYC", "region": "Africa", "currency": "USD", "currency_to_usd": 1.0, "pios": 5115, "nris": 8235, "total": 13303, "nri_pct": 61.9, "pio_pct": 38.4, "baseline_remittance_usd": 26582175, "baseline_remittance_local": 26582175.0, "baseline_remittance_inr_cr": 229.94, "depi_score": 66.7, "narrative": "Balanced community of established diaspora citizens (PIOs) and active resident professionals (NRIs)."}, {"s_no": 166, "country": "Sierra Leone", "iso3": "SLE", "region": "Africa", "currency": "USD", "currency_to_usd": 1.0, "pios": 19, "nris": 4500, "total": 4519, "nri_pct": 99.6, "pio_pct": 0.4, "baseline_remittance_usd": 14400855, "baseline_remittance_local": 14400855.0, "baseline_remittance_inr_cr": 124.57, "depi_score": 73.6, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 167, "country": "Singapore", "iso3": "SGP", "region": "Asia-Pacific", "currency": "SGD", "currency_to_usd": 1.33, "pios": 23199, "nris": 450000, "total": 483199, "nri_pct": 93.1, "pio_pct": 4.8, "baseline_remittance_usd": 7650000000, "baseline_remittance_local": 10174500000.0, "baseline_remittance_inr_cr": 66172.5, "depi_score": 91.9, "narrative": "High-income STEM, medical, finance, and corporate management corridor. Generates large per-capita transfers, venture funding, and wealth deposits."}, {"s_no": 168, "country": "Sint Maarten", "iso3": "SXM", "region": "Latin America & Caribbean", "currency": "USD", "currency_to_usd": 1.0, "pios": 3168, "nris": 2170, "total": 5338, "nri_pct": 40.7, "pio_pct": 59.3, "baseline_remittance_usd": 4482560, "baseline_remittance_local": 4482560.0, "baseline_remittance_inr_cr": 38.77, "depi_score": 56.2, "narrative": "Balanced community of established diaspora citizens (PIOs) and active resident professionals (NRIs)."}, {"s_no": 169, "country": "Slovak Republic", "iso3": "SVK", "region": "Europe", "currency": "EUR", "currency_to_usd": 0.92, "pios": 94, "nris": 10000, "total": 10094, "nri_pct": 99.1, "pio_pct": 0.9, "baseline_remittance_usd": 52004230, "baseline_remittance_local": 47843891.6, "baseline_remittance_inr_cr": 449.84, "depi_score": 77.4, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 170, "country": "Slovenia", "iso3": "SVN", "region": "Europe", "currency": "EUR", "currency_to_usd": 0.92, "pios": 88, "nris": 2903, "total": 2991, "nri_pct": 97.1, "pio_pct": 2.9, "baseline_remittance_usd": 15099560, "baseline_remittance_local": 13891595.2, "baseline_remittance_inr_cr": 130.61, "depi_score": 72.7, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 171, "country": "Solomon Islands", "iso3": "SLB", "region": "Asia-Pacific", "currency": "USD", "currency_to_usd": 1.0, "pios": 0, "nris": 30, "total": 30, "nri_pct": 100.0, "pio_pct": 0.0, "baseline_remittance_usd": 144000, "baseline_remittance_local": 144000.0, "baseline_remittance_inr_cr": 1.25, "depi_score": 57.6, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 172, "country": "Somalia", "iso3": "SOM", "region": "Africa", "currency": "USD", "currency_to_usd": 1.0, "pios": 0, "nris": 100, "total": 100, "nri_pct": 100.0, "pio_pct": 0.0, "baseline_remittance_usd": 320000, "baseline_remittance_local": 320000.0, "baseline_remittance_inr_cr": 2.77, "depi_score": 60.7, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 173, "country": "South Africa", "iso3": "ZAF", "region": "Africa", "currency": "ZAR", "currency_to_usd": 18.2, "pios": 1722600, "nris": 77400, "total": 1800000, "nri_pct": 4.3, "pio_pct": 95.7, "baseline_remittance_usd": 350000000, "baseline_remittance_local": 6370000000.0, "baseline_remittance_inr_cr": 3027.5, "depi_score": 63.3, "narrative": "Historic trading and merchant settlement dating back to the 1860s, forming an influential domestic economic and industrial community."}, {"s_no": 174, "country": "South Sudan", "iso3": "SSD", "region": "Africa", "currency": "USD", "currency_to_usd": 1.0, "pios": 0, "nris": 1000, "total": 1000, "nri_pct": 100.0, "pio_pct": 0.0, "baseline_remittance_usd": 3200000, "baseline_remittance_local": 3200000.0, "baseline_remittance_inr_cr": 27.68, "depi_score": 68.6, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 175, "country": "Spain", "iso3": "ESP", "region": "Europe", "currency": "EUR", "currency_to_usd": 0.92, "pios": 18232, "nris": 52317, "total": 70549, "nri_pct": 74.2, "pio_pct": 25.8, "baseline_remittance_usd": 680000000, "baseline_remittance_local": 625600000.0, "baseline_remittance_inr_cr": 5882.0, "depi_score": 79.4, "narrative": "Balanced community of established diaspora citizens (PIOs) and active resident professionals (NRIs)."}, {"s_no": 176, "country": "Sri Lanka", "iso3": "LKA", "region": "Asia-Pacific", "currency": "USD", "currency_to_usd": 1.0, "pios": 1600000, "nris": 7500, "total": 1607500, "nri_pct": 0.5, "pio_pct": 99.5, "baseline_remittance_usd": 108000000, "baseline_remittance_local": 108000000.0, "baseline_remittance_inr_cr": 934.2, "depi_score": 59.3, "narrative": "Long-established multi-generational diaspora community integrated into the host nation's economic fabric."}, {"s_no": 177, "country": "Sudan", "iso3": "SDN", "region": "Africa", "currency": "USD", "currency_to_usd": 1.0, "pios": 0, "nris": 300, "total": 300, "nri_pct": 100.0, "pio_pct": 0.0, "baseline_remittance_usd": 960000, "baseline_remittance_local": 960000.0, "baseline_remittance_inr_cr": 8.3, "depi_score": 64.5, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 178, "country": "Suriname", "iso3": "SUR", "region": "Latin America & Caribbean", "currency": "SRD", "currency_to_usd": 35.0, "pios": 165000, "nris": 125, "total": 165125, "nri_pct": 0.1, "pio_pct": 99.9, "baseline_remittance_usd": 18000000, "baseline_remittance_local": 630000000.0, "baseline_remittance_inr_cr": 155.7, "depi_score": 52.7, "narrative": "Historic 19th-century colonial indentured migration hub. Deep cultural and linguistic ties, but minimal family maintenance remittances due to local citizenship."}, {"s_no": 179, "country": "Sweden", "iso3": "SWE", "region": "Europe", "currency": "USD", "currency_to_usd": 1.0, "pios": 24000, "nris": 67600, "total": 91600, "nri_pct": 73.8, "pio_pct": 26.2, "baseline_remittance_usd": 380000000, "baseline_remittance_local": 380000000.0, "baseline_remittance_inr_cr": 3287.0, "depi_score": 78.1, "narrative": "Balanced community of established diaspora citizens (PIOs) and active resident professionals (NRIs)."}, {"s_no": 180, "country": "Switzerland", "iso3": "CHE", "region": "Europe", "currency": "CHF", "currency_to_usd": 0.88, "pios": 4683, "nris": 17411, "total": 22094, "nri_pct": 78.8, "pio_pct": 21.2, "baseline_remittance_usd": 600000000, "baseline_remittance_local": 528000000.0, "baseline_remittance_inr_cr": 5190.0, "depi_score": 79.2, "narrative": "High-income STEM, medical, finance, and corporate management corridor. Generates large per-capita transfers, venture funding, and wealth deposits."}, {"s_no": 181, "country": "Syria", "iso3": "SYR", "region": "GCC & Middle East", "currency": "USD", "currency_to_usd": 1.0, "pios": 0, "nris": 0, "total": 0, "nri_pct": 0.0, "pio_pct": 0.0, "baseline_remittance_usd": 0, "baseline_remittance_local": 0.0, "baseline_remittance_inr_cr": 0.0, "depi_score": 19.3, "narrative": "Balanced community of established diaspora citizens (PIOs) and active resident professionals (NRIs)."}, {"s_no": 182, "country": "Taiwan", "iso3": "TWN", "region": "Asia-Pacific", "currency": "USD", "currency_to_usd": 1.0, "pios": 31, "nris": 2524, "total": 2555, "nri_pct": 98.8, "pio_pct": 1.2, "baseline_remittance_usd": 12116595, "baseline_remittance_local": 12116595.0, "baseline_remittance_inr_cr": 104.81, "depi_score": 72.5, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 183, "country": "Tajikistan", "iso3": "TJK", "region": "Central Asia", "currency": "USD", "currency_to_usd": 1.0, "pios": 0, "nris": 1760, "total": 1760, "nri_pct": 100.0, "pio_pct": 0.0, "baseline_remittance_usd": 3872000, "baseline_remittance_local": 3872000.0, "baseline_remittance_inr_cr": 33.49, "depi_score": 69.6, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 184, "country": "Tanzania", "iso3": "TZA", "region": "Africa", "currency": "USD", "currency_to_usd": 1.0, "pios": 40000, "nris": 15000, "total": 55000, "nri_pct": 27.3, "pio_pct": 72.7, "baseline_remittance_usd": 49800000, "baseline_remittance_local": 49800000.0, "baseline_remittance_inr_cr": 430.77, "depi_score": 61.0, "narrative": "Balanced community of established diaspora citizens (PIOs) and active resident professionals (NRIs)."}, {"s_no": 185, "country": "Thailand", "iso3": "THA", "region": "Asia-Pacific", "currency": "USD", "currency_to_usd": 1.0, "pios": 150000, "nris": 250000, "total": 400000, "nri_pct": 62.5, "pio_pct": 37.5, "baseline_remittance_usd": 1206750000, "baseline_remittance_local": 1206750000.0, "baseline_remittance_inr_cr": 10438.39, "depi_score": 79.5, "narrative": "Balanced community of established diaspora citizens (PIOs) and active resident professionals (NRIs)."}, {"s_no": 186, "country": "Timor Leste", "iso3": "TLS", "region": "Asia-Pacific", "currency": "USD", "currency_to_usd": 1.0, "pios": 0, "nris": 67, "total": 67, "nri_pct": 100.0, "pio_pct": 0.0, "baseline_remittance_usd": 321600, "baseline_remittance_local": 321600.0, "baseline_remittance_inr_cr": 2.78, "depi_score": 60.4, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 187, "country": "Togo", "iso3": "TGO", "region": "Africa", "currency": "USD", "currency_to_usd": 1.0, "pios": 10, "nris": 1300, "total": 1310, "nri_pct": 99.2, "pio_pct": 0.8, "baseline_remittance_usd": 4160450, "baseline_remittance_local": 4160450.0, "baseline_remittance_inr_cr": 35.99, "depi_score": 69.3, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 188, "country": "Tonga", "iso3": "TON", "region": "Asia-Pacific", "currency": "USD", "currency_to_usd": 1.0, "pios": 50, "nris": 5, "total": 55, "nri_pct": 9.1, "pio_pct": 90.9, "baseline_remittance_usd": 26250, "baseline_remittance_local": 26250.0, "baseline_remittance_inr_cr": 0.23, "depi_score": 31.3, "narrative": "Long-established multi-generational diaspora community integrated into the host nation's economic fabric."}, {"s_no": 189, "country": "Trinidad & Tobago", "iso3": "TTO", "region": "Latin America & Caribbean", "currency": "TTD", "currency_to_usd": 6.78, "pios": 700000, "nris": 1200, "total": 701200, "nri_pct": 0.2, "pio_pct": 99.8, "baseline_remittance_usd": 60000000, "baseline_remittance_local": 406800000.0, "baseline_remittance_inr_cr": 519.0, "depi_score": 57.0, "narrative": "Historic 19th-century colonial indentured migration hub. Deep cultural and linguistic ties, but minimal family maintenance remittances due to local citizenship."}, {"s_no": 190, "country": "Tunisia", "iso3": "TUN", "region": "Africa", "currency": "USD", "currency_to_usd": 1.0, "pios": 9, "nris": 300, "total": 309, "nri_pct": 97.1, "pio_pct": 2.9, "baseline_remittance_usd": 960405, "baseline_remittance_local": 960405.0, "baseline_remittance_inr_cr": 8.31, "depi_score": 63.8, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 191, "country": "Turkey", "iso3": "TUR", "region": "Central Asia", "currency": "USD", "currency_to_usd": 1.0, "pios": 509, "nris": 3686, "total": 4195, "nri_pct": 87.9, "pio_pct": 12.1, "baseline_remittance_usd": 8132105, "baseline_remittance_local": 8132105.0, "baseline_remittance_inr_cr": 70.34, "depi_score": 69.2, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 192, "country": "Turkmenistan", "iso3": "TKM", "region": "Central Asia", "currency": "USD", "currency_to_usd": 1.0, "pios": 4, "nris": 100, "total": 104, "nri_pct": 96.2, "pio_pct": 3.8, "baseline_remittance_usd": 220180, "baseline_remittance_local": 220180.0, "baseline_remittance_inr_cr": 1.9, "depi_score": 58.9, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 193, "country": "Turks & Caicos Islands", "iso3": "TCA", "region": "Latin America & Caribbean", "currency": "USD", "currency_to_usd": 1.0, "pios": 50, "nris": 300, "total": 350, "nri_pct": 85.7, "pio_pct": 14.3, "baseline_remittance_usd": 602250, "baseline_remittance_local": 602250.0, "baseline_remittance_inr_cr": 5.21, "depi_score": 59.9, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 194, "country": "Tuvalu", "iso3": "TUV", "region": "Asia-Pacific", "currency": "USD", "currency_to_usd": 1.0, "pios": 20, "nris": 0, "total": 20, "nri_pct": 0.0, "pio_pct": 100.0, "baseline_remittance_usd": 900, "baseline_remittance_local": 900.0, "baseline_remittance_inr_cr": 0.01, "depi_score": 19.9, "narrative": "Long-established multi-generational diaspora community integrated into the host nation's economic fabric."}, {"s_no": 195, "country": "Uganda", "iso3": "UGA", "region": "Africa", "currency": "USD", "currency_to_usd": 1.0, "pios": 9000, "nris": 29800, "total": 38800, "nri_pct": 76.8, "pio_pct": 23.2, "baseline_remittance_usd": 95765000, "baseline_remittance_local": 95765000.0, "baseline_remittance_inr_cr": 828.37, "depi_score": 74.6, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 196, "country": "Ukraine", "iso3": "UKR", "region": "Europe", "currency": "USD", "currency_to_usd": 1.0, "pios": 0, "nris": 1150, "total": 1150, "nri_pct": 100.0, "pio_pct": 0.0, "baseline_remittance_usd": 5980000, "baseline_remittance_local": 5980000.0, "baseline_remittance_inr_cr": 51.73, "depi_score": 70.3, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 197, "country": "UAE", "iso3": "ARE", "region": "GCC & Middle East", "currency": "AED", "currency_to_usd": 3.67, "pios": 17760, "nris": 4326248, "total": 4344008, "nri_pct": 99.6, "pio_pct": 0.4, "baseline_remittance_usd": 24500000000, "baseline_remittance_local": 89915000000.0, "baseline_remittance_inr_cr": 211925.0, "depi_score": 98.5, "narrative": "Major Gulf labor and trade corridor; 99% NRI workforce with exceptionally high remittance frequency for family maintenance and NRE bank deposits."}, {"s_no": 198, "country": "U.K.", "iso3": "GBR", "region": "Europe", "currency": "GBP", "currency_to_usd": 0.79, "pios": 913836, "nris": 369000, "total": 1282836, "nri_pct": 28.8, "pio_pct": 71.2, "baseline_remittance_usd": 9200000000, "baseline_remittance_local": 7268000000.0, "baseline_remittance_inr_cr": 79580.0, "depi_score": 77.2, "narrative": "High-income STEM, medical, finance, and corporate management corridor. Generates large per-capita transfers, venture funding, and wealth deposits."}, {"s_no": 199, "country": "U.S.A.", "iso3": "USA", "region": "North America", "currency": "USD", "currency_to_usd": 1.0, "pios": 3767737, "nris": 2311484, "total": 6079221, "nri_pct": 38.0, "pio_pct": 62.0, "baseline_remittance_usd": 31500000000, "baseline_remittance_local": 31500000000.0, "baseline_remittance_inr_cr": 272475.0, "depi_score": 84.0, "narrative": "High-income STEM, medical, finance, and corporate management corridor. Generates large per-capita transfers, venture funding, and wealth deposits."}, {"s_no": 200, "country": "Uruguay", "iso3": "URY", "region": "Latin America & Caribbean", "currency": "USD", "currency_to_usd": 1.0, "pios": 50, "nris": 950, "total": 1000, "nri_pct": 95.0, "pio_pct": 5.0, "baseline_remittance_usd": 1902250, "baseline_remittance_local": 1902250.0, "baseline_remittance_inr_cr": 16.45, "depi_score": 66.1, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 201, "country": "Uzbekistan", "iso3": "UZB", "region": "Central Asia", "currency": "USD", "currency_to_usd": 1.0, "pios": 67, "nris": 5500, "total": 5567, "nri_pct": 98.8, "pio_pct": 1.2, "baseline_remittance_usd": 12103015, "baseline_remittance_local": 12103015.0, "baseline_remittance_inr_cr": 104.69, "depi_score": 73.2, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 202, "country": "Vanuatu", "iso3": "VUT", "region": "Asia-Pacific", "currency": "USD", "currency_to_usd": 1.0, "pios": 15, "nris": 0, "total": 15, "nri_pct": 0.0, "pio_pct": 100.0, "baseline_remittance_usd": 675, "baseline_remittance_local": 675.0, "baseline_remittance_inr_cr": 0.01, "depi_score": 19.7, "narrative": "Long-established multi-generational diaspora community integrated into the host nation's economic fabric."}, {"s_no": 203, "country": "Venezuela", "iso3": "VEN", "region": "Latin America & Caribbean", "currency": "USD", "currency_to_usd": 1.0, "pios": 29, "nris": 40, "total": 69, "nri_pct": 58.0, "pio_pct": 42.0, "baseline_remittance_usd": 81305, "baseline_remittance_local": 81305.0, "baseline_remittance_inr_cr": 0.7, "depi_score": 46.5, "narrative": "Balanced community of established diaspora citizens (PIOs) and active resident professionals (NRIs)."}, {"s_no": 204, "country": "Vietnam", "iso3": "VNM", "region": "Asia-Pacific", "currency": "USD", "currency_to_usd": 1.0, "pios": 0, "nris": 2700, "total": 2700, "nri_pct": 100.0, "pio_pct": 0.0, "baseline_remittance_usd": 12960000, "baseline_remittance_local": 12960000.0, "baseline_remittance_inr_cr": 112.1, "depi_score": 73.0, "narrative": "Predominantly active NRI professional and employment community with high direct financial linkage to India."}, {"s_no": 205, "country": "Yemen", "iso3": "YEM", "region": "GCC & Middle East", "currency": "USD", "currency_to_usd": 1.0, "pios": 420, "nris": 700, "total": 1120, "nri_pct": 62.5, "pio_pct": 37.5, "baseline_remittance_usd": 1978900, "baseline_remittance_local": 1978900.0, "baseline_remittance_inr_cr": 17.12, "depi_score": 58.1, "narrative": "Balanced community of established diaspora citizens (PIOs) and active resident professionals (NRIs)."}, {"s_no": 206, "country": "Zambia", "iso3": "ZMB", "region": "Africa", "currency": "USD", "currency_to_usd": 1.0, "pios": 25000, "nris": 5000, "total": 30000, "nri_pct": 16.7, "pio_pct": 83.3, "baseline_remittance_usd": 17125000, "baseline_remittance_local": 17125000.0, "baseline_remittance_inr_cr": 148.13, "depi_score": 55.1, "narrative": "Long-established multi-generational diaspora community integrated into the host nation's economic fabric."}, {"s_no": 207, "country": "Zimbabwe", "iso3": "ZWE", "region": "Africa", "currency": "USD", "currency_to_usd": 1.0, "pios": 7400, "nris": 2100, "total": 9500, "nri_pct": 22.1, "pio_pct": 77.9, "baseline_remittance_usd": 7053000, "baseline_remittance_local": 7053000.0, "baseline_remittance_inr_cr": 61.01, "depi_score": 53.2, "narrative": "Long-established multi-generational diaspora community integrated into the host nation's economic fabric."}]};
+    let currentCurrency = 'USD';
+    let currentMapMetric = 'remittance';
+    let activeSimulation = {
+      usdInr: 86.50,
+      eurInr: 94.02,
+      gbpInr: 109.49,
+      gulfShift: 0,
+      techShift: 0
+    };
+
+    const CURR_RATES = {
+      USD: 1.0,
+      EUR: 0.92,
+      GBP: 0.79,
+      INR: 86.50
+    };
+
+    const CURR_SYMBOLS = {
+      USD: '$',
+      EUR: '€',
+      GBP: '£',
+      INR: '₹'
+    };
+
+    // Format currency
+    function formatMoney(amountUSD) {
+      const rate = CURR_RATES[currentCurrency] || 1.0;
+      const converted = amountUSD * rate;
+
+      if (currentCurrency === 'INR') {
+        const crores = converted / 1e7;
+        if (crores >= 100000) {
+          return '₹' + (crores / 100000).toFixed(2) + 'L Cr';
+        }
+        return '₹' + crores.toLocaleString(undefined, { maximumFractionDigits: 0 }) + ' Cr';
+      }
+
+      const sym = CURR_SYMBOLS[currentCurrency] || '$';
+      if (converted >= 1e9) {
+        return sym + (converted / 1e9).toFixed(2) + 'B';
+      }
+      if (converted >= 1e6) {
+        return sym + (converted / 1e6).toFixed(1) + 'M';
+      }
+      return sym + Math.round(converted).toLocaleString();
+    }
+
+    function setCurrency(curr) {
+      currentCurrency = curr;
+      document.querySelectorAll('.curr-btn').forEach(b => {
+        b.classList.remove('bg-blue-600', 'text-white', 'shadow');
+        b.classList.add('text-slate-400');
+      });
+      const activeBtn = document.getElementById('btn-curr-' + curr);
+      if (activeBtn) {
+        activeBtn.classList.remove('text-slate-400');
+        activeBtn.classList.add('bg-blue-600', 'text-white', 'shadow');
+      }
+      runSimulation();
+    }
+
+    function setMapMetric(metric) {
+      currentMapMetric = metric;
+      document.getElementById('btn-map-remit').classList.remove('bg-blue-600', 'text-white', 'shadow');
+      document.getElementById('btn-map-remit').classList.add('text-slate-400');
+      document.getElementById('btn-map-total').classList.remove('bg-blue-600', 'text-white', 'shadow');
+      document.getElementById('btn-map-total').classList.add('text-slate-400');
+      document.getElementById('btn-map-nri').classList.remove('bg-blue-600', 'text-white', 'shadow');
+      document.getElementById('btn-map-nri').classList.add('text-slate-400');
+
+      if (metric === 'remittance') {
+        document.getElementById('btn-map-remit').classList.add('bg-blue-600', 'text-white', 'shadow');
+        document.getElementById('btn-map-remit').classList.remove('text-slate-400');
+      } else if (metric === 'total') {
+        document.getElementById('btn-map-total').classList.add('bg-blue-600', 'text-white', 'shadow');
+        document.getElementById('btn-map-total').classList.remove('text-slate-400');
+      } else {
+        document.getElementById('btn-map-nri').classList.add('bg-blue-600', 'text-white', 'shadow');
+        document.getElementById('btn-map-nri').classList.remove('text-slate-400');
+      }
+      renderMap();
+    }
+
+    function resetSliders() {
+      document.getElementById('slider-usd-inr').value = 86.5;
+      document.getElementById('slider-eur-inr').value = 94.0;
+      document.getElementById('slider-gulf-shift').value = 0;
+      document.getElementById('slider-tech-shift').value = 0;
+      runSimulation();
+    }
+
+    function runSimulation() {
+      const usdInr = parseFloat(document.getElementById('slider-usd-inr').value);
+      const eurInr = parseFloat(document.getElementById('slider-eur-inr').value);
+      const gulfShift = parseFloat(document.getElementById('slider-gulf-shift').value) / 100;
+      const techShift = parseFloat(document.getElementById('slider-tech-shift').value) / 100;
+
+      document.getElementById('val-usd-inr').innerText = '₹' + usdInr.toFixed(2);
+      document.getElementById('val-eur-inr').innerText = '₹' + eurInr.toFixed(2);
+      document.getElementById('val-gulf-shift').innerText = (gulfShift >= 0 ? '+' : '') + Math.round(gulfShift * 100) + '%';
+      document.getElementById('val-tech-shift').innerText = (techShift >= 0 ? '+' : '') + Math.round(techShift * 100) + '%';
+
+      // Update dynamic conversion
+      CURR_RATES.INR = usdInr;
+      CURR_RATES.EUR = usdInr / eurInr;
+
+      let simulatedTotalUSD = 0;
+      let baselineTotalINR = 0;
+      let simulatedTotalINR = 0;
+
+      DATA.countries.forEach(c => {
+        let factor = 1.0;
+        if (c.region === 'GCC & Middle East') {
+          factor += gulfShift;
+        } else if (['U.S.A.', 'U.K.', 'Canada', 'Australia', 'Germany'].includes(c.country)) {
+          factor += techShift;
+        }
+
+        const simUSD = c.baseline_remittance_usd * factor;
+        simulatedTotalUSD += simUSD;
+        baselineTotalINR += c.baseline_remittance_usd * 86.50;
+        simulatedTotalINR += simUSD * usdInr;
+      });
+
+      const windfallINR = simulatedTotalINR - baselineTotalINR;
+      const windfallCr = Math.round(windfallINR / 1e7);
+
+      // Update KPIs
+      document.getElementById('kpi-total-remit').innerText = formatMoney(simulatedTotalUSD);
+      document.getElementById('kpi-inr-equiv').innerText = '₹' + (simulatedTotalINR / 1e12).toFixed(2) + 'L Cr';
+      document.getElementById('sim-total-inflow').innerText = formatMoney(simulatedTotalUSD);
+      document.getElementById('sim-inr-cr').innerText = '₹' + (simulatedTotalINR / 1e12).toFixed(2) + 'L Cr';
+
+      const windfallEl = document.getElementById('kpi-windfall');
+      const windfallSub = document.getElementById('kpi-windfall-sub');
+      const simWindfallEl = document.getElementById('sim-windfall-cr');
+
+      if (windfallCr >= 0) {
+        windfallEl.innerText = '+₹' + windfallCr.toLocaleString() + ' Cr';
+        windfallEl.className = 'text-2xl font-extrabold text-emerald-400 tracking-tight';
+        windfallSub.innerText = 'Gain to Indian households & deposits';
+        simWindfallEl.innerText = '+₹' + windfallCr.toLocaleString() + ' Cr';
+        simWindfallEl.className = 'font-bold text-emerald-400 font-mono';
+      } else {
+        windfallEl.innerText = '-₹' + Math.abs(windfallCr).toLocaleString() + ' Cr';
+        windfallEl.className = 'text-2xl font-extrabold text-rose-400 tracking-tight';
+        windfallSub.innerText = 'Deficit from stronger Rupee / slowdown';
+        simWindfallEl.innerText = '-₹' + Math.abs(windfallCr).toLocaleString() + ' Cr';
+        simWindfallEl.className = 'font-bold text-rose-400 font-mono';
+      }
+
+      // Re-render
+      renderMap();
+      renderCharts();
+      renderIndianStates(simulatedTotalINR);
+      calculatePersonalImpact();
+      renderTable();
+      inspectCountry(document.getElementById('country-select').value || 'U.S.A.');
+      renderComparison();
+    }
+
+    function renderMap() {
+      const countries = DATA.countries.filter(c => c.iso3 !== 'UNKNOWN');
+      const locations = countries.map(c => c.iso3);
+      let zValues = [];
+      let hoverTexts = [];
+      let colorScale = 'Blues';
+
+      if (currentMapMetric === 'remittance') {
+        colorScale = [
+          [0.0, '#0F172A'],
+          [0.02, '#1E3A8A'],
+          [0.1, '#2563EB'],
+          [0.4, '#38BDF8'],
+          [1.0, '#F59E0B']
+        ];
+        zValues = countries.map(c => c.baseline_remittance_usd);
+        hoverTexts = countries.map(c => 
+          `<b>${c.country}</b><br>` +
+          `Estimated Remittance: <b>${formatMoney(c.baseline_remittance_usd)}</b><br>` +
+          `Total Diaspora: ${c.total.toLocaleString()}<br>` +
+          `NRIs: ${c.nris.toLocaleString()} (${c.nri_pct}%) | PIOs: ${c.pios.toLocaleString()}<br>` +
+          `Corridor: ${c.narrative}`
+        );
+      } else if (currentMapMetric === 'total') {
+        colorScale = 'Purples';
+        zValues = countries.map(c => c.total);
+        hoverTexts = countries.map(c => 
+          `<b>${c.country}</b><br>` +
+          `Total Diaspora: <b>${c.total.toLocaleString()}</b><br>` +
+          `PIOs: ${c.pios.toLocaleString()} (${c.pio_pct}%)<br>` +
+          `NRIs: ${c.nris.toLocaleString()} (${c.nri_pct}%)`
+        );
+      } else {
+        colorScale = 'Viridis';
+        zValues = countries.map(c => c.nri_pct);
+        hoverTexts = countries.map(c => 
+          `<b>${c.country}</b><br>` +
+          `NRI Share: <b>${c.nri_pct}%</b><br>` +
+          `PIO Share: ${c.pio_pct}%<br>` +
+          `Total: ${c.total.toLocaleString()}`
+        );
+      }
+
+      const mapData = [{
+        type: 'choropleth',
+        locations: locations,
+        z: zValues,
+        text: hoverTexts,
+        hoverinfo: 'text',
+        colorscale: colorScale,
+        autocolorscale: false,
+        marker: {
+          line: {
+            color: '#1e293b',
+            width: 0.5
+          }
+        },
+        colorbar: {
+          tickfont: { color: '#94a3b8', size: 10 },
+          thickness: 12,
+          len: 0.8
+        }
+      }];
+
+      const layout = {
+        geo: {
+          showframe: false,
+          showcoastlines: false,
+          projection: { type: 'natural earth' },
+          bgcolor: 'rgba(0,0,0,0)',
+          showocean: true,
+          oceancolor: '#0B0F19',
+          showland: true,
+          landcolor: '#111827'
+        },
+        paper_bgcolor: 'rgba(0,0,0,0)',
+        plot_bgcolor: 'rgba(0,0,0,0)',
+        margin: { t: 0, b: 0, l: 0, r: 0 }
+      };
+
+      const config = { responsive: true, displayModeBar: false };
+      Plotly.newPlot('world-map', mapData, layout, config);
+
+      document.getElementById('world-map').on('plotly_click', function(data) {
+        if (data.points && data.points.length > 0) {
+          const iso = data.points[0].location;
+          const target = DATA.countries.find(c => c.iso3 === iso);
+          if (target) {
+            document.getElementById('country-select').value = target.country;
+            inspectCountry(target.country);
+          }
+        }
+      });
+    }
+
+    function renderCharts() {
+      // Top 10 Bar Chart
+      const sorted = [...DATA.countries].sort((a, b) => b.baseline_remittance_usd - a.baseline_remittance_usd).slice(0, 10).reverse();
+      const barData = [{
+        type: 'bar',
+        orientation: 'h',
+        x: sorted.map(c => c.baseline_remittance_usd * (CURR_RATES[currentCurrency] || 1.0)),
+        y: sorted.map(c => c.country),
+        marker: {
+          color: sorted.map((c, i) => i === sorted.length - 1 ? '#38BDF8' : (i >= sorted.length - 3 ? '#3B82F6' : '#1E40AF'))
+        },
+        text: sorted.map(c => formatMoney(c.baseline_remittance_usd)),
+        textposition: 'auto',
+        hoverinfo: 'text'
+      }];
+
+      const barLayout = {
+        paper_bgcolor: 'rgba(0,0,0,0)',
+        plot_bgcolor: 'rgba(0,0,0,0)',
+        margin: { t: 10, b: 20, l: 90, r: 20 },
+        xaxis: { showgrid: false, showticklabels: false },
+        yaxis: { tickfont: { color: '#cbd5e1', size: 10 } }
+      };
+
+      Plotly.newPlot('bar-top10', barData, barLayout, { responsive: true, displayModeBar: false });
+
+      // Regional Donut Chart
+      const regionSums = {};
+      DATA.countries.forEach(c => {
+        regionSums[c.region] = (regionSums[c.region] || 0) + c.baseline_remittance_usd;
+      });
+
+      const donutData = [{
+        type: 'pie',
+        labels: Object.keys(regionSums),
+        values: Object.values(regionSums),
+        hole: 0.6,
+        marker: {
+          colors: ['#3B82F6', '#10B981', '#6366F1', '#F59E0B', '#EC4899', '#8B5CF6', '#14B8A6']
+        },
+        textinfo: 'percent',
+        hoverinfo: 'label+percent+value',
+        textfont: { color: '#FFFFFF', size: 10 }
+      }];
+
+      const donutLayout = {
+        paper_bgcolor: 'rgba(0,0,0,0)',
+        plot_bgcolor: 'rgba(0,0,0,0)',
+        showlegend: true,
+        legend: {
+          font: { color: '#94a3b8', size: 9 },
+          orientation: 'h',
+          y: -0.2
+        },
+        margin: { t: 10, b: 30, l: 10, r: 10 }
+      };
+
+      Plotly.newPlot('donut-regions', donutData, donutLayout, { responsive: true, displayModeBar: false });
+    }
+
+    function inspectCountry(countryName) {
+      const c = DATA.countries.find(item => item.country === countryName);
+      if (!c) return;
+
+      document.getElementById('insp-badge').innerText = c.iso3;
+      document.getElementById('insp-region').innerText = c.region;
+      document.getElementById('insp-total').innerText = c.total.toLocaleString();
+      document.getElementById('insp-split').innerText = `${(c.pios / 1e6).toFixed(2)}M (${c.pio_pct}%) / ${(c.nris / 1e6).toFixed(2)}M (${c.nri_pct}%)`;
+      document.getElementById('insp-remit').innerText = formatMoney(c.baseline_remittance_usd);
+      document.getElementById('insp-depi').innerText = c.depi_score + ' / 100';
+      document.getElementById('insp-narrative').innerText = c.narrative;
+    }
+
+    function renderComparison() {
+      const aName = document.getElementById('comp-a').value || 'U.S.A.';
+      const bName = document.getElementById('comp-b').value || 'UAE';
+
+      const a = DATA.countries.find(c => c.country === aName);
+      const b = DATA.countries.find(c => c.country === bName);
+      if (!a || !b) return;
+
+      const popLeader = a.total >= b.total ? a : b;
+      const popTrailer = a.total >= b.total ? b : a;
+      const popRatio = (popLeader.total / Math.max(popTrailer.total, 1)).toFixed(1);
+
+      const remitLeader = a.baseline_remittance_usd >= b.baseline_remittance_usd ? a : b;
+      const remitTrailer = a.baseline_remittance_usd >= b.baseline_remittance_usd ? b : a;
+      const remitRatio = (remitLeader.baseline_remittance_usd / Math.max(remitTrailer.baseline_remittance_usd, 1)).toFixed(1);
+
+      const compDiv = document.getElementById('comparison-result');
+      compDiv.innerHTML = `
+        <div class="p-3 bg-slate-900 rounded-lg space-y-1.5 border-l-2 border-blue-500">
+          <div class="font-bold text-white text-sm">${a.country}</div>
+          <div class="text-slate-400">Total Diaspora: <strong class="text-white">${a.total.toLocaleString()}</strong></div>
+          <div class="text-slate-400">NRIs: <strong class="text-emerald-400">${a.nri_pct}%</strong> | PIOs: <strong class="text-indigo-400">${a.pio_pct}%</strong></div>
+          <div class="text-slate-400">Remittance: <strong class="text-white">${formatMoney(a.baseline_remittance_usd)}</strong></div>
+          <div class="text-slate-400">DEPI Score: <strong class="text-amber-400">${a.depi_score}</strong></div>
+        </div>
+
+        <div class="p-3 bg-slate-900 rounded-lg flex flex-col justify-center text-center space-y-1.5 border border-slate-800">
+          <span class="text-slate-400 font-bold uppercase text-[10px] tracking-wider">Head-to-Head Comparison</span>
+          <div class="text-slate-200 font-mono text-xs">
+            Diaspora: <strong class="text-white">${popLeader.country}</strong> is <strong class="text-blue-400">${popRatio}x</strong> of ${popTrailer.country}
+          </div>
+          <div class="text-slate-200 font-mono text-xs">
+            Remittance: <strong class="text-white">${remitLeader.country}</strong> is <strong class="text-emerald-400">${remitRatio}x</strong> of ${remitTrailer.country}
+          </div>
+        </div>
+
+        <div class="p-3 bg-slate-900 rounded-lg space-y-1.5 border-l-2 border-emerald-500">
+          <div class="font-bold text-white text-sm">${b.country}</div>
+          <div class="text-slate-400">Total Diaspora: <strong class="text-white">${b.total.toLocaleString()}</strong></div>
+          <div class="text-slate-400">NRIs: <strong class="text-emerald-400">${b.nri_pct}%</strong> | PIOs: <strong class="text-indigo-400">${b.pio_pct}%</strong></div>
+          <div class="text-slate-400">Remittance: <strong class="text-white">${formatMoney(b.baseline_remittance_usd)}</strong></div>
+          <div class="text-slate-400">DEPI Score: <strong class="text-amber-400">${b.depi_score}</strong></div>
+        </div>
+      `;
+    }
+
+    function renderTable() {
+      const q = document.getElementById('table-search').value.toLowerCase();
+      const region = document.getElementById('region-filter').value;
+      const type = document.getElementById('type-filter').value;
+
+      let filtered = DATA.countries.filter(c => {
+        const matchesQ = c.country.toLowerCase().includes(q) || c.iso3.toLowerCase().includes(q);
+        const matchesRegion = (region === 'ALL' || c.region === region);
+        let matchesType = true;
+        if (type === 'NRI_HEAVY') matchesType = (c.nri_pct >= 75);
+        else if (type === 'PIO_HEAVY') matchesType = (c.pio_pct >= 75);
+        else if (type === 'BALANCED') matchesType = (c.nri_pct >= 25 && c.nri_pct <= 75);
+
+        return matchesQ && matchesRegion && matchesType;
+      });
+
+      // Sort by remittance descending
+      filtered.sort((a, b) => b.baseline_remittance_usd - a.baseline_remittance_usd);
+
+      const tbody = document.getElementById('table-body');
+      tbody.innerHTML = '';
+
+      filtered.forEach((c, idx) => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-800/50 transition-colors cursor-pointer';
+        tr.onclick = () => {
+          document.getElementById('country-select').value = c.country;
+          inspectCountry(c.country);
+          window.scrollTo({ top: document.getElementById('country-inspector').offsetTop - 80, behavior: 'smooth' });
+        };
+
+        tr.innerHTML = `
+          <td class="py-2.5 px-3.5 text-center text-slate-500 font-mono">${idx + 1}</td>
+          <td class="py-2.5 px-3.5 font-sans font-semibold text-white flex items-center gap-2">
+            <span>${c.country}</span>
+            <span class="text-[10px] text-slate-400 font-mono bg-slate-800 px-1.5 py-0.5 rounded">${c.iso3}</span>
+          </td>
+          <td class="py-2.5 px-3.5 font-sans text-slate-400">${c.region}</td>
+          <td class="py-2.5 px-3.5 text-right text-indigo-300">${c.pios.toLocaleString()}</td>
+          <td class="py-2.5 px-3.5 text-right text-emerald-300">${c.nris.toLocaleString()}</td>
+          <td class="py-2.5 px-3.5 text-right font-bold text-white">${c.total.toLocaleString()}</td>
+          <td class="py-2.5 px-3.5 text-center">
+            <div class="w-20 bg-slate-800 h-2 rounded-full overflow-hidden mx-auto flex">
+              <div style="width: ${c.nri_pct}%" class="bg-emerald-400 h-full" title="NRI: ${c.nri_pct}%"></div>
+              <div style="width: ${c.pio_pct}%" class="bg-indigo-400 h-full" title="PIO: ${c.pio_pct}%"></div>
+            </div>
+          </td>
+          <td class="py-2.5 px-3.5 text-right font-bold text-emerald-400">${formatMoney(c.baseline_remittance_usd)}</td>
+          <td class="py-2.5 px-3.5 text-center">
+            <span class="px-2 py-0.5 rounded text-[11px] font-bold ${c.depi_score >= 80 ? 'bg-amber-500/20 text-amber-400' : (c.depi_score >= 50 ? 'bg-blue-500/20 text-blue-400' : 'bg-slate-800 text-slate-400')}">
+              ${c.depi_score}
+            </span>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById('table-count').innerText = `Showing ${filtered.length} of ${DATA.countries.length} territories`;
+    }
+
+    const INDIAN_STATES_DATA = [
+      { state: "Maharashtra", category: "State", pct: 35.20, corridor: "Global Corporate Financial Hub & High-Value NRE Accounts (US, Gulf, UK, Singapore)" },
+      { state: "Kerala", category: "State", pct: 10.20, corridor: "The Traditional Gulf Lifeline (UAE, Saudi Arabia, Oman, Qatar, Kuwait) powering household consumption & real estate" },
+      { state: "Tamil Nadu", category: "State", pct: 8.80, corridor: "Southeast Asia (Singapore, Malaysia) & Gulf Professional, Healthcare and Engineering Workforce" },
+      { state: "Karnataka", category: "State", pct: 7.60, corridor: "US Silicon Valley, Seattle & European STEM Tech Corridors & Venture Capital Deposits" },
+      { state: "Gujarat", category: "State", pct: 5.80, corridor: "Historic Entrepreneurial & Business Diaspora across the US, UK, Canada and East Africa" },
+      { state: "Punjab", category: "State", pct: 5.40, corridor: "Canada, UK, Australia & European Farming, Transport & Student Diaspora Communities" },
+      { state: "Uttar Pradesh", category: "State", pct: 4.20, corridor: "Fastest-growing Gulf Blue-Collar, Construction, Artisanal and Technical Workforce" },
+      { state: "Telangana", category: "State", pct: 4.20, corridor: "US Tech, Healthcare, Biotech & Higher Education Corridor (Silicon Valley, Texas, New Jersey)" },
+      { state: "West Bengal", category: "State", pct: 3.50, corridor: "Middle East Technical Services, Academic, and Southeast Asia Professional Ties" },
+      { state: "Andhra Pradesh", category: "State", pct: 2.80, corridor: "US Tech, Academia, Gulf Engineering and Maritime Logistics Workforce" },
+      { state: "Rajasthan", category: "State", pct: 2.80, corridor: "Gulf Trade, Hospitality, Jewelry, Artisanal & Construction Corridors" },
+      { state: "Bihar", category: "State", pct: 2.50, corridor: "Rapidly Expanding Gulf Workforce (Saudi, UAE, Qatar) & Southeast Asia Services" },
+      { state: "Delhi (NCT)", category: "Union Territory", pct: 2.40, corridor: "International Corporate Management, Embassies, Consulting & Institutional Banking Deposits" },
+      { state: "Haryana", category: "State", pct: 1.10, corridor: "US, Canada, Australia & Gulf Logistics, Agriculture, IT & Corporate Diaspora" },
+      { state: "Goa", category: "State", pct: 1.10, corridor: "Historic Maritime/Merchant Navy Fleet & European (UK, Portugal) Heritage Diaspora Corridors" },
+      { state: "Madhya Pradesh", category: "State", pct: 0.90, corridor: "Gulf Corporate, Engineering, IT Services & Central Asian Professional Diaspora" },
+      { state: "Odisha", category: "State", pct: 0.70, corridor: "Gulf Petrochemical, Metal Fabrication & Southeast Asian Marine/Technical Workforce" },
+      { state: "Uttarakhand", category: "State", pct: 0.45, corridor: "Hospitality Industry, Culinary Chefs, Defense Personnel, Transport & Gulf/SE Asia Services" },
+      { state: "Jammu and Kashmir", category: "Union Territory", pct: 0.40, corridor: "Handicrafts, Pashmina, Carpet Export, Gulf Business Houses & UK Diaspora Ties" },
+      { state: "Himachal Pradesh", category: "State", pct: 0.35, corridor: "Hospitality Management, Nursing, Armed Forces Veterans, and Gulf & European Service Sectors" },
+      { state: "Jharkhand", category: "State", pct: 0.35, corridor: "Heavy Industry, Mining Engineers, Metallurgy & Gulf Technical Employment" },
+      { state: "Assam", category: "State", pct: 0.35, corridor: "Tea Plantation Management, Oil & Gas Engineers in the Gulf, and Singapore/UK Professionals" },
+      { state: "Chhattisgarh", category: "State", pct: 0.30, corridor: "Mining Technology, Power Engineering, and Middle East Construction & Trade" },
+      { state: "Chandigarh", category: "Union Territory", pct: 0.25, corridor: "High-Volume Student, PR & Professional Remittances from Canada, Australia, UK & US" },
+      { state: "Puducherry", category: "Union Territory", pct: 0.20, corridor: "Historic French Citizenship, Military Pensions & European/Reunion Island Diaspora Ties" },
+      { state: "Meghalaya", category: "State", pct: 0.08, corridor: "Higher Education, Nursing, Healthcare & Church Diaspora Links in the UK & Europe" },
+      { state: "Manipur", category: "State", pct: 0.08, corridor: "Sports Management, Nursing, Hospitality & Southeast Asia Border Trade Corridors" },
+      { state: "Tripura", category: "State", pct: 0.07, corridor: "Cross-Border Trade Transit & Middle East Technical and Healthcare Workforce" },
+      { state: "Nagaland", category: "State", pct: 0.06, corridor: "Overseas Theological Studies, Hospitality & Southeast Asian Professional Links" },
+      { state: "Mizoram", category: "State", pct: 0.06, corridor: "Overseas Nursing, Healthcare in UK/Gulf & Southeast/East Asian Church Links" },
+      { state: "Arunachal Pradesh", category: "State", pct: 0.05, corridor: "Frontier Trade, Government Delegations, and Overseas Academic Researchers" },
+      { state: "Sikkim", category: "State", pct: 0.05, corridor: "Eco-Tourism Management, Hospitality, and East Asia/European Cultural Links" },
+      { state: "Dadra & Nagar Haveli and Daman & Diu", category: "Union Territory", pct: 0.04, corridor: "Industrial Workforce, Maritime Trade & Historic Portuguese Citizenship/UK Ties" },
+      { state: "Ladakh", category: "Union Territory", pct: 0.04, corridor: "Eco-Tourism, Himalayan Buddhist Study Corridors in US/Europe, and Gulf Trade" },
+      { state: "Andaman and Nicobar Islands", category: "Union Territory", pct: 0.03, corridor: "Maritime Shipping Logistics, Tourism & Southeast Asia Marine Links" },
+      { state: "Lakshadweep", category: "Union Territory", pct: 0.03, corridor: "Maritime Trade, Shipping Crews, and Maldives/Gulf Fishing & Marine Logistics" }
+    ];
+
+    let currentTotalINR = 10945710000000;
+
+    function renderIndianStates(totalINR) {
+      currentTotalINR = totalINR;
+      const totalLakhCr = (totalINR / 1e12).toFixed(2);
+      const headerEl = document.getElementById('state-total-header');
+      if (headerEl) headerEl.innerText = '₹' + totalLakhCr + 'L Cr';
+
+      const topStates = INDIAN_STATES_DATA.slice(0, 10).reverse();
+      const stateBarData = [{
+        type: 'bar',
+        orientation: 'h',
+        x: topStates.map(s => Math.round((s.pct / 100) * (totalINR / 1e7))),
+        y: topStates.map(s => s.state),
+        marker: {
+          color: topStates.map((s, idx) => idx === topStates.length - 1 ? '#10B981' : (idx >= topStates.length - 3 ? '#3B82F6' : '#6366F1'))
+        },
+        text: topStates.map(s => {
+          const cr = Math.round((s.pct / 100) * (totalINR / 1e7));
+          return '₹' + cr.toLocaleString() + ' Cr (' + s.pct + '%)';
+        }),
+        textposition: 'auto',
+        hoverinfo: 'text'
+      }];
+
+      const stateBarLayout = {
+        paper_bgcolor: 'rgba(0,0,0,0)',
+        plot_bgcolor: 'rgba(0,0,0,0)',
+        margin: { t: 10, b: 20, l: 110, r: 20 },
+        xaxis: { showgrid: false, showticklabels: false },
+        yaxis: { tickfont: { color: '#cbd5e1', size: 10 } }
+      };
+
+      Plotly.newPlot('bar-indian-states', stateBarData, stateBarLayout, { responsive: true, displayModeBar: false });
+      inspectState(document.getElementById('state-select').value || 'Maharashtra');
+    }
+
+    function inspectState(stateName) {
+      const s = INDIAN_STATES_DATA.find(item => item.state === stateName) || INDIAN_STATES_DATA[0];
+      const stateInflowCr = Math.round((s.pct / 100) * (currentTotalINR / 1e7));
+
+      document.getElementById('state-pct').innerText = s.pct + '%';
+      document.getElementById('state-inflow').innerText = '₹' + stateInflowCr.toLocaleString() + ' Cr';
+      document.getElementById('state-corridor').innerText = s.corridor;
+    }
+
+    function copySimulationText() {
+      const usdInr = document.getElementById('slider-usd-inr').value;
+      const totalInflow = document.getElementById('kpi-total-remit').innerText;
+      const inrEquiv = document.getElementById('kpi-inr-equiv').innerText;
+      const windfall = document.getElementById('kpi-windfall').innerText;
+
+      const text = `🇮🇳 Global Indian Diaspora & Remittance Simulation Result:
+📊 Scenario Parameters:
+• Exchange Rate: $1 = ₹${usdInr}
+• Total Annual Remittances to India: ${inrEquiv} (${totalInflow})
+• Household Purchasing Power Windfall: ${windfall}
+
+📍 Top Recipient Indian States (RBI Survey):
+1. Maharashtra: ~35.2% (Financial hub & corporate NRE accounts)
+2. Kerala: ~10.2% (Gulf workforce consumption lifeline)
+3. Tamil Nadu: ~8.8% (Singapore, Malaysia & Gulf professionals)
+4. Karnataka: ~7.6% (US Silicon Valley tech diaspora)
+5. Gujarat & Punjab: ~5.4% - 5.8% (US, Canada, UK diaspora)
+
+Explore & stress-test the live interactive simulator here:
+[Insert your GitHub / live demo link here]
+
+#IndianDiaspora #Macroeconomics #OpenSource #DataAnalytics #FinTech #RBI #StudentProject`;
+
+      navigator.clipboard.writeText(text).then(() => {
+        const btnText = document.getElementById('btn-copy-text');
+        const orig = btnText.innerText;
+        btnText.innerText = '✅ Copied to Clipboard!';
+        setTimeout(() => {
+          btnText.innerText = orig;
+        }, 3000);
+      }).catch(err => {
+        console.error('Failed to copy', err);
+      });
+    }
+
+    function exportCSV() {
+      const headers = ["S.No", "Country", "ISO3", "Region", "Currency", "PIOs", "NRIs", "Total Diaspora", "NRI %", "PIO %", "Estimated Remittance USD", "DEPI Score"];
+      let csvContent = "data:text/csv;charset=utf-8," + headers.join(",") + "\n";
+
+      DATA.countries.forEach(c => {
+        const row = [
+          c.s_no, `"${c.country}"`, c.iso3, `"${c.region}"`, c.currency,
+          c.pios, c.nris, c.total, c.nri_pct, c.pio_pct,
+          c.baseline_remittance_usd, c.depi_score
+        ];
+        csvContent += row.join(",") + "\n";
+      });
+
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", "Indian_Diaspora_Remittances_2026.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function updateCalcCurrency() {
+      calculatePersonalImpact();
+    }
+
+    function setCalcPreset(val) {
+      document.getElementById('calc-amount').value = val;
+      calculatePersonalImpact();
+    }
+
+    function calculatePersonalImpact() {
+      const sel = document.getElementById('calc-country');
+      if (!sel) return;
+      const opt = sel.options[sel.selectedIndex];
+      const curr = opt.getAttribute('data-curr');
+      const defaultRate = parseFloat(opt.getAttribute('data-rate'));
+      const avgMonthly = parseFloat(opt.getAttribute('data-avg'));
+
+      let effectiveRate = defaultRate;
+      if (curr === 'USD') {
+        effectiveRate = parseFloat(document.getElementById('slider-usd-inr').value);
+      } else if (curr === 'EUR') {
+        effectiveRate = parseFloat(document.getElementById('slider-eur-inr').value);
+      }
+
+      const amount = parseFloat(document.getElementById('calc-amount').value) || 0;
+      const amountLabel = document.getElementById('calc-amount-label');
+      if (amountLabel) amountLabel.innerText = amount.toLocaleString() + ' ' + curr;
+
+      const monthlyINR = Math.round(amount * effectiveRate);
+      const annualINR = monthlyINR * 12;
+
+      const monthlyEl = document.getElementById('calc-monthly-inr');
+      if (monthlyEl) monthlyEl.innerText = '₹' + monthlyINR.toLocaleString();
+
+      const annualEl = document.getElementById('calc-annual-inr');
+      if (annualEl) {
+        if (annualINR >= 100000) {
+          annualEl.innerText = '₹' + (annualINR / 100000).toFixed(2) + ' Lakh';
+        } else {
+          annualEl.innerText = '₹' + annualINR.toLocaleString();
+        }
+      }
+
+      const windfallAnnual = Math.round(annualINR * 0.05);
+      const windfallEl = document.getElementById('calc-windfall-amount');
+      if (windfallEl) windfallEl.innerText = '+₹' + windfallAnnual.toLocaleString() + ' / year';
+
+      const ratio = avgMonthly > 0 ? (amount / avgMonthly).toFixed(1) : '1.0';
+      const stateEl = document.getElementById('calc-state');
+      const stateName = stateEl ? (stateEl.value || 'India') : 'India';
+
+      const narrEl = document.getElementById('calc-narrative');
+      if (narrEl) {
+        narrEl.innerHTML = `Sending <strong>${amount.toLocaleString()} ${curr}</strong>/mo directly supports household maintenance, savings, and local commerce in <strong>${stateName}</strong>. This transfer represents <strong>${ratio}x</strong> the typical monthly NRI remittance for this corridor!`;
+      }
+    }
+
+    async function fetchLiveExchangeRates() {
+      const badge = document.getElementById('live-rate-badge');
+      const textEl = document.getElementById('live-rate-text');
+      try {
+        const res = await fetch('https://open.er-api.com/v6/latest/USD');
+        if (!res.ok) throw new Error('Network error');
+        const data = await res.json();
+        if (data && data.rates && data.rates.INR) {
+          const liveUsdInr = parseFloat(data.rates.INR.toFixed(2));
+          const liveEurInr = parseFloat((data.rates.INR / data.rates.EUR).toFixed(2));
+          const liveGbpInr = parseFloat((data.rates.INR / data.rates.GBP).toFixed(2));
+
+          document.getElementById('slider-usd-inr').value = liveUsdInr;
+          document.getElementById('slider-eur-inr').value = liveEurInr;
+
+          CURR_RATES.INR = liveUsdInr;
+          CURR_RATES.EUR = data.rates.EUR;
+          CURR_RATES.GBP = data.rates.GBP;
+
+          if (textEl) {
+            textEl.innerHTML = `Live FX: <strong class="text-emerald-400">1 USD = ₹${liveUsdInr}</strong> • <strong class="text-indigo-400">1 EUR = ₹${liveEurInr}</strong>`;
+          }
+          if (badge) badge.classList.remove('hidden');
+          runSimulation();
+        }
+      } catch (err) {
+        console.log('Using offline baseline rates:', err);
+        if (textEl) {
+          textEl.innerHTML = `Baseline FX: <strong>1 USD = ₹86.50</strong> • <strong>1 EUR = ₹94.02</strong>`;
+        }
+        if (badge) badge.classList.remove('hidden');
+      }
+    }
+
+    // Initialize
+    window.addEventListener('DOMContentLoaded', () => {
+      // Populate select dropdowns
+      const select = document.getElementById('country-select');
+      const compA = document.getElementById('comp-a');
+      const compB = document.getElementById('comp-b');
+
+      const sortedCountries = [...DATA.countries].sort((a, b) => a.country.localeCompare(b.country));
+
+      sortedCountries.forEach(c => {
+        const opt = new Option(`${c.country} (${c.iso3})`, c.country);
+        select.add(opt);
+
+        const optA = new Option(`${c.country}`, c.country);
+        compA.add(optA);
+
+        const optB = new Option(`${c.country}`, c.country);
+        compB.add(optB);
+      });
+
+      select.value = 'U.S.A.';
+      compA.value = 'U.S.A.';
+      compB.value = 'UAE';
+
+      // Populate state select (alphabetically sorted so any user finds their state instantly)
+      const stateSelect = document.getElementById('state-select');
+      if (stateSelect) {
+        stateSelect.innerHTML = '';
+        const sortedStates = [...INDIAN_STATES_DATA].sort((a, b) => a.state.localeCompare(b.state));
+        sortedStates.forEach(s => {
+          const opt = new Option(`${s.state} (${s.pct}%)`, s.state);
+          stateSelect.add(opt);
+        });
+        stateSelect.value = 'Maharashtra';
+      }
+
+      // Populate personal calculator recipient state select
+      const calcState = document.getElementById('calc-state');
+      if (calcState) {
+        calcState.innerHTML = '';
+        const sortedStates = [...INDIAN_STATES_DATA].sort((a, b) => a.state.localeCompare(b.state));
+        sortedStates.forEach(s => {
+          const opt = new Option(`${s.state}`, s.state);
+          calcState.add(opt);
+        });
+        calcState.value = 'Kerala';
+      }
+
+      runSimulation();
+      fetchLiveExchangeRates();
+    });
+  </script>
+</body>
+</html>
