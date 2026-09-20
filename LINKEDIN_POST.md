@@ -50,4 +50,6 @@ When the Rupee weakens against the Dollar, an NRI sends home more Rupees with ze
 
 Question for you: If you or your family live abroad, which country and recipient Indian state do you represent? Does currency depreciation help or hurt you?
 
+P.S. Please let me know what more features I can add to make this even more useful!
+
 #DataAnalytics #FinTech #Macroeconomics #IndianDiaspora #RBI #OpenSource #DataScience #WebDevelopment #SoftwareEngineering #Python #India
